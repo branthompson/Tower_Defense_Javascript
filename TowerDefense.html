@@ -20,25 +20,25 @@
     // canvas.height = 768;
 
     const backgroundImage = new Image();
-    backgroundImage.src = 'Stage1TD.png';
+    backgroundImage.src = "PNGs/Maps/Stage1TD.png";
 
     
     
 
     function createTower(xs,ys,types){
       var spriteImage = new Image();
-      spriteImage.src = "./DarkPounce.png";
-      const newtower = {type:types, x:xs, y:ys,damage:1,range:10,spriteImage:spriteImage,height:32,width:32};
+      spriteImage.src = "PNGs/Towers/Level_1-4.png";
+      const newtower = {type:types, x:xs, y:ys,damage:1,range:10,spriteImage:spriteImage,height:128,width:64};
         tower[tower.length] = newtower;
 
 
     }
     function createEnemy(types){
       xs = 0;
-      ys= 150;
+      ys= 450;
       var spriteImage = new Image();
-      spriteImage.src = "./Pounce.png";
-      const newenemy = {type:types, x:xs, y:ys,speed:1,spriteImage:spriteImage,height:32,width:32,health:100};
+      spriteImage.src = "PNGs/Enemies/Bug.png";
+      const newenemy = {type:types, x:xs, y:ys,speed:1,spriteImage:spriteImage,height:64,width:64,health:100};
         enemies[enemies.length] = newenemy;
 
     }
