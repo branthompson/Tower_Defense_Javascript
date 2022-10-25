@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Static Is Static</title>
+    <script type="application/javascript">
+
+    var INTERVAL = 50;
+    var DEBUG = false;
+    var canvas;             // The canvas shown on the page.
+    var ctx;
+    const tower = [];
+    const enemies = [];
+    var count = 0;
+    var counts = 0;
+
+    // canvas.width = 1280;
+    // canvas.height = 768;
+
+    const backgroundImage = new Image();
+    backgroundImage.src = 'Stage1TD.png';
+
+    
+    
+
+    function createTower(xs,ys,types){
+      var spriteImage = new Image();
+      spriteImage.src = "./DarkPounce.png";
+      const newtower = {type:types, x:xs, y:ys,damage:1,range:10,spriteImage:spriteImage,height:32,width:32};
+        tower[tower.length] = newtower;
+
+
+    }
+    function createEnemy(types){
+      xs = 0;
+      ys= 150;
+      var spriteImage = new Image();
+      spriteImage.src = "./Pounce.png";
+      const newenemy = {type:types, x:xs, y:ys,speed:1,spriteImage:spriteImage,height:32,width:32,health:100};
+        enemies[enemies.length] = newenemy;
+
+    }
+    function Tick() {
+      drawEnemies();
+      drawTowers();
+    }
+
+
+function Tick2(){
+  createEnemy(1);
+}
+function drawEnemies(){
+
+  for(let i = 0;i<enemies.length;i++){
+        ctx.clearRect(enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height);
+      enemies[i].x += enemies[i].speed;
+
+      ctx.drawImage(enemies[i].spriteImage,0*enemies[i].width,0*enemies[i].height,enemies[i].width,enemies[i].height,enemies[i].x,enemies[i].y,enemies[i].width,enemies[i].height);
+//make it so if it hits edge it gets deleted
+    }
+
+}
+  function  drawTowers(){
+      for(let i = 0;i<tower.length;i++){
+          ctx.drawImage(tower[i].spriteImage,0*tower[i].width,0*tower[i].height,tower[i].width,tower[i].height,tower[i].x,tower[i].y,tower[i].width,tower[i].height)
+          const whatToRemove = [];
+          for(let j=0;j<enemies.length;j++){
+
+            if((enemies[j].x <= (tower[i].x + (((tower[i].width))*tower[i].range))) && (enemies[j].x  >= (tower[i].x - (((tower[i].width))*tower[i].range))) && (enemies[j].y <= (tower[i].y + (((tower[i].height))*tower[i].range))) && (enemies[j].y >= (tower[i].y - (((tower[i].height))*tower[i].range)))){
+              enemies[j].health -= tower[i].damage;
+               document.getElementById("YouWin").innerHTML = (count+ "-killed " + enemies.length);
+              if(enemies[j].health <= 0){
+                ctx.clearRect(enemies[j].x, enemies[j].y, enemies[j].width, enemies[j].height);
+                whatToRemove[whatToRemove.length] = j;
+              }
+              break;
+            }
+
+          }
+          for(let j = 0; j<whatToRemove.length; j++){
+           enemies.splice(whatToRemove[j],1);
+           count++;
+          }
+          whatToRemove.length = 0;
+
+      }
+    }
+    function loadComplete() {
+    console.log("Load is complete.");
+    canvas = document.getElementById("theCanvas");
+    ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ff0000";
+    ctx.font = "30px Arial";
+    ctx.lineWidth = 50;
+    ctx.strokeStyle = 'red';
+    createTower(200,200,1);
+    createTower(100,100,1);
+    createTower(50,50,1);
+    myInterval = self.setInterval(function(){Tick()}, INTERVAL);
+    myInterval2 = self.setInterval(function(){Tick2()}, INTERVAL*100);
+
+    ctx.drawImage(backgroundImage, 0, 0); // draws the background of stage 1
+
+}
+    </script>
+  </head>
+ <body onload="loadComplete()" bgcolor="0f0000" text="#ffffff">
+
+  <canvas id="theCanvas" tabindex="1" width="1280" height="768"></canvas>
+<h2 id="YouWin">This will update on kill</h2>
+  </body>
+</html>
