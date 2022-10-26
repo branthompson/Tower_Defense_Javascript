@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Static Is Static</title>
+    <title>Tower Defense!</title>
+    <script src="js/stage1PathCoordinates.js"></script>
     <script type="application/javascript">
 
     var INTERVAL = 50;
@@ -16,14 +17,91 @@
     var count = 0;
     var counts = 0;
 
+    var smallSpriteHeight = 64;
+    var smallSpriteWidth = 64;
+
+    var smallSpriteX = 100;
+    var smallSpriteY = 300;
+
     // canvas.width = 1280;
     // canvas.height = 768;
 
     const backgroundImage = new Image();
     backgroundImage.src = "PNGs/Maps/Stage1TD.png";
 
+    const bugSprite = new Image();
+    bugSprite.src = "PNGs/Enemies/Bug.png";
     
+
+    // Base class for all enemy types that are 64x64
+    class smallEnemy 
+    {
+      constructor({ position = { x: 0, y: 0} })   // turns position into an object with x and y properties, each enemy object created must come with it's position 
+      {
+        this.position = position;                 // Each enemy will have it's own individual position
+        this.width = 64;  
+        this.height = 64;
+        this.coordinateIndex = 0;                 // coordinate index inside stage1Path array
+        this.center =                             // point at center of the sprite
+        {
+          x: this.position.x + this.width / 2,
+          y: this.position.y + this.height / 2
+        }
+
+      }
+
+      // draw the small enemy
+      draw()
+      {
+        ctx.drawImage(bugSprite, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+      }
+
+      // move the small enemy based on the coordinates taken from stage1PathCoordinates.js
+      move()
+      {
+        this.draw();
+
+        const coordinate = stage1Path[this.coordinateIndex];             // the points where we want the enemy to move to
+        const xDistance = coordinate.x - this.center.x;                // get the distance between the enemy x pos and next coordinate x pos
+        const yDistance = coordinate.y - this.center.y;                // get the distance between the enemy y pos and next coordinate y pos
+        const angle = Math.atan2(yDistance, xDistance);                  // angle at which to move along path
+        
+        this.position.x += Math.cos(angle);                              // update x position
+        this.position.y += Math.sin(angle);                              // update y position
+        this.center =                                                    // update center point
+        {
+          x: this.position.x + this.width / 2,
+          y: this.position.y + this.height / 2
+        }
+
+        // console.log(Math.round(this.position.x));
+        // console.log(Math.round(this.center.x));
+
+        if (Math.round(this.center.x) === coordinate.x && Math.round(this.center.y) === coordinate.y && this.coordinateIndex < stage1Path.length - 1)
+        {
+          this.coordinateIndex++;
+        }
+
+        
+
+
+      }
+
+    }
+
     
+
+
+    // const bugEnemy = new smallEnemy({ position: { x: stage1Path[0].x, y: stage1Path[0].y } });           // make a bug at positon x and y on the canvas
+    
+
+
+
+    
+    function drawStage()
+    {
+      ctx.drawImage(backgroundImage, 0, 0);                                          // draws the background of stage 1
+    }
 
     function createTower(xs,ys,types){
       var spriteImage = new Image();
@@ -33,60 +111,82 @@
 
 
     }
+
     function createEnemy(types){
       xs = 0;
       ys= 450;
       var spriteImage = new Image();
-      spriteImage.src = "PNGs/Enemies/Bug.png";
+      spriteImage.src = "PNGs/Enemies/Fly.png";
       const newenemy = {type:types, x:xs, y:ys,speed:1,spriteImage:spriteImage,height:64,width:64,health:100};
         enemies[enemies.length] = newenemy;
 
     }
+
+    // fill enemies array up with bug enemies, the xOffset positions the next enemy a fixed distance away from the previous enemy
+    for (let i = 1; i < 10; i++)
+    {
+      const xOffset = i * 150;
+      enemies.push(new smallEnemy({ position: { x: stage1Path[0].x - xOffset, y: stage1Path[0].y } }));
+    }
+
     function Tick() {
-      drawEnemies();
-      drawTowers();
+
+      drawStage();
+
+      // for each bug enemy inside enemies array, move
+      enemies.forEach(smallEnemy => {
+        smallEnemy.move();
+      });
+
+      // drawEnemies();
+      // drawTowers();
+
+    
     }
 
 
-function Tick2(){
-  createEnemy(1);
-}
-function drawEnemies(){
+    // function Tick2(){
+    //   createEnemy(1);
+    //   }
 
-  for(let i = 0;i<enemies.length;i++){
-        ctx.clearRect(enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height);
-      enemies[i].x += enemies[i].speed;
+// function drawEnemies(){
 
-      ctx.drawImage(enemies[i].spriteImage,0*enemies[i].width,0*enemies[i].height,enemies[i].width,enemies[i].height,enemies[i].x,enemies[i].y,enemies[i].width,enemies[i].height);
-//make it so if it hits edge it gets deleted
-    }
+//   for(let i = 0;i<enemies.length;i++){
+//         ctx.clearRect(enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height);
+//       enemies[i].x += enemies[i].speed;
 
-}
-  function  drawTowers(){
-      for(let i = 0;i<tower.length;i++){
-          ctx.drawImage(tower[i].spriteImage,0*tower[i].width,0*tower[i].height,tower[i].width,tower[i].height,tower[i].x,tower[i].y,tower[i].width,tower[i].height)
-          const whatToRemove = [];
-          for(let j=0;j<enemies.length;j++){
+//       ctx.drawImage(enemies[i].spriteImage,0*enemies[i].width,0*enemies[i].height,enemies[i].width,enemies[i].height,enemies[i].x,enemies[i].y,enemies[i].width,enemies[i].height);
+// //make it so if it hits edge it gets deleted
+//     }
 
-            if((enemies[j].x <= (tower[i].x + (((tower[i].width))*tower[i].range))) && (enemies[j].x  >= (tower[i].x - (((tower[i].width))*tower[i].range))) && (enemies[j].y <= (tower[i].y + (((tower[i].height))*tower[i].range))) && (enemies[j].y >= (tower[i].y - (((tower[i].height))*tower[i].range)))){
-              enemies[j].health -= tower[i].damage;
-               document.getElementById("YouWin").innerHTML = (count+ "-killed " + enemies.length);
-              if(enemies[j].health <= 0){
-                ctx.clearRect(enemies[j].x, enemies[j].y, enemies[j].width, enemies[j].height);
-                whatToRemove[whatToRemove.length] = j;
-              }
-              break;
-            }
+// }
+  // function  drawTowers(){
+  //     for(let i = 0;i<tower.length;i++){
+  //         ctx.drawImage(tower[i].spriteImage,0*tower[i].width,0*tower[i].height,tower[i].width,tower[i].height,tower[i].x,tower[i].y,tower[i].width,tower[i].height)
+  //         const whatToRemove = [];
+  //         for(let j=0;j<enemies.length;j++){
 
-          }
-          for(let j = 0; j<whatToRemove.length; j++){
-           enemies.splice(whatToRemove[j],1);
-           count++;
-          }
-          whatToRemove.length = 0;
+  //           if((enemies[j].x <= (tower[i].x + (((tower[i].width))*tower[i].range))) && (enemies[j].x  >= (tower[i].x - (((tower[i].width))*tower[i].range))) && (enemies[j].y <= (tower[i].y + (((tower[i].height))*tower[i].range))) && (enemies[j].y >= (tower[i].y - (((tower[i].height))*tower[i].range)))){
+  //             enemies[j].health -= tower[i].damage;
+  //              document.getElementById("YouWin").innerHTML = (count+ "-killed " + enemies.length);
+  //             if(enemies[j].health <= 0){
+  //               ctx.clearRect(enemies[j].x, enemies[j].y, enemies[j].width, enemies[j].height);
+  //               whatToRemove[whatToRemove.length] = j;
+  //             }
+  //             break;
+  //           }
 
-      }
-    }
+  //         }
+  //         for(let j = 0; j<whatToRemove.length; j++){
+  //          enemies.splice(whatToRemove[j],1);
+  //          count++;
+  //         }
+  //         whatToRemove.length = 0;
+
+  //     }
+  //   }
+
+
     function loadComplete() {
     console.log("Load is complete.");
     canvas = document.getElementById("theCanvas");
@@ -95,18 +195,29 @@ function drawEnemies(){
     ctx.font = "30px Arial";
     ctx.lineWidth = 50;
     ctx.strokeStyle = 'red';
-    createTower(200,200,1);
-    createTower(100,100,1);
-    createTower(50,50,1);
+    drawStage();
+    // createTower(200,200,1);
+    // createTower(100,100,1);
+    // createTower(50,50,1);
+    // console.log(stage1Path[1].x);
+    // console.log(stage1Path[1].y);
+
+    
+
+
+
     myInterval = self.setInterval(function(){Tick()}, INTERVAL);
-    myInterval2 = self.setInterval(function(){Tick2()}, INTERVAL*100);
+    // myInterval2 = self.setInterval(function(){Tick2()}, INTERVAL*100);
 
-    ctx.drawImage(backgroundImage, 0, 0); // draws the background of stage 1
+    
 
-}
+    }
     </script>
   </head>
+
+ <!-- <script src="js/stage1PathCoordinates.js"></script> -->
  <body onload="loadComplete()" bgcolor="0f0000" text="#ffffff">
+ 
 
   <canvas id="theCanvas" tabindex="1" width="1280" height="768"></canvas>
 <h2 id="YouWin">This will update on kill</h2>
