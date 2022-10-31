@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Tower Defense!</title>
     <script src="js/stage1PathCoordinates.js"></script>
+    <script src="js/PlacementTiles.js"></script>
     <script type="application/javascript">
 
     var INTERVAL = 50;
@@ -26,12 +27,68 @@
     // canvas.width = 1280;
     // canvas.height = 768;
 
+    let activeTile = undefined;
+
     const backgroundImage = new Image();
     backgroundImage.src = "PNGs/Maps/Stage1TD.png";
 
     const bugSprite = new Image();
     bugSprite.src = "PNGs/Enemies/Bug.png";
+
+    const tower1 = new Image();
+    tower1.src = "PNGs/Towers/Tower1-1.png";
+
+    const placementTilesSymbol2D = []
+    for (let i = 0; i < placementTilesMap.length; i += 20) // increment by 20 because we have 20 columns, i.e how many tiles in each row
+    {
+      placementTilesSymbol2D.push(placementTilesMap.slice(i, i + 20));
+    }
+
+    class PlacementTile {
+      constructor({ position = {x: 0, y: 0}})
+      {
+        this.position = position;
+        this.size = 64;
+        this.color = 'rgba(255, 255, 255, 0.15)';
+        this.occupied = false;
+      }
+
+      draw()
+      {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.position.x, this.position.y, this.size, this.size);
+      }
+
+      update(mouse)
+      {
+        this.draw();
+
+        if (mouse.x > this.position.x && mouse.x < this.position.x + this.size && mouse.y > this.position.y && mouse.y < this.position.y + this.size)
+        {
+          // console.log('colliding');
+          this.color = 'white';
+        }
+        else this.color = 'rgba(255, 255, 255, 0.15)';
+      }
+
+    }
     
+    // Makes an array of placement tile objects that are the same row and column as portrayed in PlacementTiles.js
+    const placementTiles = [];
+    placementTilesSymbol2D.forEach((row, y) => {
+      row.forEach((symbol, x) => {
+        if (symbol === 62) {
+          placementTiles.push(new PlacementTile({
+            position: {
+              x: x * 64,
+              y: y * 64
+            }
+          }))
+        }
+      })
+    })
+    
+    // console.log(placementTiles);
 
     // Base class for all enemy types that are 64x64
     class smallEnemy 
@@ -89,6 +146,22 @@
 
     }
 
+    class Tower
+    {
+      constructor({ position = { X: 0, y: 0 } })
+      {
+        this.position = position;
+        this.width = 64;
+        this.height = 128;
+      }
+
+      draw()
+      {
+        ctx.drawImage(tower1, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+      }
+
+    }
+
     
 
 
@@ -138,8 +211,18 @@
         smallEnemy.move();
       });
 
+      placementTiles.forEach(tile => {
+        tile.update(mouse);
+      })
+
+      tower.forEach(tower => {
+        tower.draw();
+      })
+
       // drawEnemies();
       // drawTowers();
+
+      // console.log(tower);
 
     
     }
@@ -187,39 +270,79 @@
   //   }
 
 
-    function loadComplete() {
-    console.log("Load is complete.");
-    canvas = document.getElementById("theCanvas");
-    ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#ff0000";
-    ctx.font = "30px Arial";
-    ctx.lineWidth = 50;
-    ctx.strokeStyle = 'red';
-    drawStage();
-    // createTower(200,200,1);
-    // createTower(100,100,1);
-    // createTower(50,50,1);
-    // console.log(stage1Path[1].x);
-    // console.log(stage1Path[1].y);
-
-    
+    function loadComplete() 
+    {
+      console.log("Load is complete.");
+      canvas = document.getElementById("theCanvas");
+      ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ff0000";
+      ctx.font = "30px Arial";
+      ctx.lineWidth = 50;
+      ctx.strokeStyle = 'red';
+      drawStage();
 
 
+      // This lets you click onto a placement tile and draw a tower
+      // causes error if moved
+      canvas.addEventListener('click', (event) => {
+        if (activeTile && !activeTile.occupied) {
+          tower.push(new Tower({
+            position: {
+              x: activeTile.position.x,
+              y: activeTile.position.y
+            }
+          }))
+          activeTile.occupied = true;
+        }
+      })
 
-    myInterval = self.setInterval(function(){Tick()}, INTERVAL);
-    // myInterval2 = self.setInterval(function(){Tick2()}, INTERVAL*100);
+      
 
-    
+
+      // createTower(200,200,1);
+      // createTower(100,100,1);
+      // createTower(50,50,1);
+      // console.log(stage1Path[1].x);
+      // console.log(stage1Path[1].y);
+
+      myInterval = self.setInterval(function () { Tick() }, INTERVAL);
+      // myInterval2 = self.setInterval(function(){Tick2()}, INTERVAL*100);
 
     }
+
+    
+    const mouse = {
+      x: undefined,
+      y: undefined
+    }
+
+
+    window.addEventListener('mousemove', (event) => {
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
+
+        activeTile = null;
+        for (let i = 0; i < placementTiles.length; i++) {
+          const tile = placementTiles[i];
+          if (mouse.x > tile.position.x && mouse.x < tile.position.x + tile.size && mouse.y > tile.position.y && mouse.y < tile.position.y + tile.size) {
+            activeTile = tile;
+            break;
+          }
+        }
+        // console.log(activeTile);
+      })
+
     </script>
   </head>
 
- <!-- <script src="js/stage1PathCoordinates.js"></script> -->
  <body onload="loadComplete()" bgcolor="0f0000" text="#ffffff">
  
 
   <canvas id="theCanvas" tabindex="1" width="1280" height="768"></canvas>
-<h2 id="YouWin">This will update on kill</h2>
+<!-- <h2 id="YouWin">This will update on kill</h2> -->
+
+
+
   </body>
 </html>
+
