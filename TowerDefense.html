@@ -9,7 +9,7 @@
     <script src="js/PlacementTiles.js"></script>
     <script type="application/javascript">
 
-    var INTERVAL = 50;
+    var INTERVAL = 20;
     var DEBUG = false;
     var canvas;             // The canvas shown on the page.
     var ctx;
@@ -36,8 +36,13 @@
     bugSprite.src = "PNGs/Enemies/Bug.png";
 
     const tower1 = new Image();
-    tower1.src = "PNGs/Towers/Tower1-1.png";
+    tower1.src = "PNGs/Towers/tower1-26resize.png";
 
+    const towerprojectile = new Image();
+    towerprojectile.src = "PNGs/Projectiles/tower1projectileresize.png";
+
+    // placementTilesMap is inside PlacementTiles.js
+    // 2D array for the placement tiles with the symbol that associates them to be a valid placement tile (62 inside PlacementTiles.js)
     const placementTilesSymbol2D = []
     for (let i = 0; i < placementTilesMap.length; i += 20) // increment by 20 because we have 20 columns, i.e how many tiles in each row
     {
@@ -80,7 +85,7 @@
         if (symbol === 62) {
           placementTiles.push(new PlacementTile({
             position: {
-              x: x * 64,
+              x: x * 64,  // 64 represents the width and height of the tile
               y: y * 64
             }
           }))
@@ -88,7 +93,6 @@
       })
     })
     
-    // console.log(placementTiles);
 
     // Base class for all enemy types that are 64x64
     class smallEnemy 
@@ -104,6 +108,7 @@
           x: this.position.x + this.width / 2,
           y: this.position.y + this.height / 2
         }
+        this.radius = 32;
 
       }
 
@@ -111,6 +116,12 @@
       draw()
       {
         ctx.drawImage(bugSprite, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+
+        // draws a circle around the enemy, we can use this to look at collisions
+        ctx.beginPath();
+        ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 0, 132, 0.15)';
+        ctx.fill();
       }
 
       // move the small enemy based on the coordinates taken from stage1PathCoordinates.js
@@ -134,42 +145,125 @@
         // console.log(Math.round(this.position.x));
         // console.log(Math.round(this.center.x));
 
+        // if the enemy has made it to the coordinate, move to the next coordinate                   && stop at last coordinate (off canvas)
         if (Math.round(this.center.x) === coordinate.x && Math.round(this.center.y) === coordinate.y && this.coordinateIndex < stage1Path.length - 1)
         {
           this.coordinateIndex++;
         }
 
-        
-
-
+      
       }
 
     }
 
     class Tower
     {
-      constructor({ position = { X: 0, y: 0 } })
+      constructor({ position = { x: 0, y: 0 } })
       {
         this.position = position;
-        this.width = 64;
-        this.height = 128;
+        this.width = 128;
+        this.height = 138;
+        this.center = {
+          x: this.position.x + this.width / 2,
+          y: this.position.y + this.height / 2
+        }
+        this.projectileSpawnPoint = {                // this is the position that we want the projectile to spawn at the height of the tower animation
+          x: this.position.x + (this.width / 2) - 20,
+          y: this.position.y
+        }
+        this.projectiles = [];  // an array of new projectile objects with their own position properties          
+        this.radius = 300;      // radius of the vision sphere we create, inc/dec this value to adjust range of tower
+        this.target;
+        this.frames = 0;        // used for how fast the tower shoots
+
       }
 
       draw()
       {
+        // draw the tower
         ctx.drawImage(tower1, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+        
+        // draw the vision sphere
+        ctx.beginPath();
+        ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 220, 255, 0.15)';
+        ctx.fill();
       }
 
+      update()
+      {
+        this.draw();
+
+        // push projectiles into the projectiles array every 50 frames && and if a target is within vision of tower
+        // decrease or increase this number to adjust fire rate
+        if (this.frames % 50 === 0 && this.target)
+        {
+          this.projectiles.push(new Projectile({  // each building is responsible for it's own projectiles
+            position: {
+              x: this.projectileSpawnPoint.x,
+              y: this.projectileSpawnPoint.y
+            },
+            enemy: this.target   // pass in the enemy from the projectiles class, this is helping us do things like check for collision, the target is the first enemy in range of tower (updated inside tick)
+          }))
+        }
+        this.frames++;           // increments every tick cycle
+      }
+
+      // rotate()
+      // {
+      //   var angle = Math.atan2(mouse.y - this.position.y, mouse.x - this.position.x) / Math.PI * 180;
+      //   this.rotation = angle;
+      // }
+
+    }
+
+    class Projectile
+    {
+      constructor({position = {x: 0, y:0}, enemy })  // when creating a projectile, pass in the position and the enemy it's targeting
+      {
+        this.position = position;
+        this.width = 31;
+        this.height = 25;
+        this.velocity = 
+        {
+          x: 0,
+          y: 0
+        }
+        this.enemy = enemy;
+      }
+
+      // this is drawing tower1 projectile
+      draw()
+      {
+        // ctx.beginPath();
+        // ctx.arc(this.position.x, this.position.y, 10, 0, Math.PI * 2);
+        // ctx.fillStyle = 'orange';
+        // ctx.fill();
+
+        ctx.drawImage(towerprojectile, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+      }
+
+      move()
+      {
+        this.draw();
+
+        // just like with the enemy movement we want the angle of the projectile and the enemies
+        const angle = Math.atan2(this.enemy.center.y - this.position.y, this.enemy.center.x - this.position.x );
+        const speed = 7;  // how fast the projectile moves
+
+        this.velocity.x = Math.cos(angle) * speed;    // push the projectile on the x axis towards the enemy
+        this.velocity.y = Math.sin(angle) * speed;    // push the projectile on the y axis towards the enemy
+
+        this.position.x += this.velocity.x;   // move the projectile's x
+        this.position.y += this.velocity.y;   // move the projectile's y
+
+      }
     }
 
     
 
 
     // const bugEnemy = new smallEnemy({ position: { x: stage1Path[0].x, y: stage1Path[0].y } });           // make a bug at positon x and y on the canvas
-    
-
-
-
     
     function drawStage()
     {
@@ -211,18 +305,62 @@
         smallEnemy.move();
       });
 
+      // for each tile in placementTiles array update the mouse over feature
       placementTiles.forEach(tile => {
         tile.update(mouse);
       })
 
-      tower.forEach(tower => {
-        tower.draw();
+      tower.forEach(tower => 
+      {
+        tower.update();
+        tower.target = null; // this is nothing before setting it i.e. tower targets nothing at first
+        const enemyInRange = enemies.filter(enemy => {
+          const xDifference = enemy.center.x - tower.center.x; // x value of distance between center of enemy and tower
+          const yDifference = enemy.center.y - tower.center.y; // y value of distance between center of enemy and tower
+          const distance = Math.hypot(xDifference, yDifference); // returns square root of the sum of xDif and yDif i.e. pythagorean theorem to find it's length
+          return distance < enemy.radius + tower.radius;  // return true if the enemy is inside the vision sphere of the tower
+        })
+        tower.target = enemyInRange[0]; // target the first enemy that comes within range of tower
+        
+
+        // loop thru projectiles array from the end
+        for (let i = tower.projectiles.length - 1; i >= 0; i--)
+        { 
+          // for each tower move a projectile
+          const projectile = tower.projectiles[i];
+          projectile.move();
+
+          // Check for collision with an enemy and if so, erase the projectile from the projectiles array
+          if (projectile.position.x > projectile.enemy.position.x && 
+              projectile.position.x < projectile.enemy.position.x + projectile.enemy.width && 
+              projectile.position.y > projectile.enemy.position.y && 
+              projectile.position.y < projectile.enemy.position.y + projectile.enemy.height)
+          {
+            tower.projectiles.splice(i, 1);
+          }
+
+
+          // CIRCLES?!?
+          //****************************************
+          // each projectile will be assigned to an enemy in which the projectile is moving towards
+          // const xDifference = projectile.enemy.center.x - projectile.position.x;  
+          // const yDifference = projectile.enemy.center.y - projectile.position.y;  
+          // const distance = Math.hypot(xDifference, yDifference);
+
+          // console.log(distance);
+
+          // if (distance < projectile.enemy.center + projectile.x)
+          // {
+          //   tower.projectiles.splice(i, 1);
+          // }
+          //*******************************************
+
+        }
+
       })
 
-      // drawEnemies();
-      // drawTowers();
+      
 
-      // console.log(tower);
 
     
     }
@@ -290,9 +428,9 @@
             position: {
               x: activeTile.position.x,
               y: activeTile.position.y
-            }
+            } // push tower into tower array with placement tiles position
           }))
-          activeTile.occupied = true;
+          activeTile.occupied = true;  // this keeps from placing more than one turret on a placement tile
         }
       })
 
@@ -316,7 +454,7 @@
       y: undefined
     }
 
-
+    // moving mouse over a valid placement tile sets it as an active tile
     window.addEventListener('mousemove', (event) => {
         mouse.x = event.clientX;
         mouse.y = event.clientY;
@@ -324,12 +462,12 @@
         activeTile = null;
         for (let i = 0; i < placementTiles.length; i++) {
           const tile = placementTiles[i];
-          if (mouse.x > tile.position.x && mouse.x < tile.position.x + tile.size && mouse.y > tile.position.y && mouse.y < tile.position.y + tile.size) {
+          if (mouse.x > tile.position.x && mouse.x < tile.position.x + tile.size && mouse.y > tile.position.y && mouse.y < tile.position.y + tile.size) // mouse collision with placement tile
+          {
             activeTile = tile;
             break;
           }
         }
-        // console.log(activeTile);
       })
 
     </script>
