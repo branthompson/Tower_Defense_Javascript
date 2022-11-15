@@ -9,7 +9,7 @@
     <script src="js/PlacementTiles.js"></script>
     <script type="application/javascript">
 
-    var INTERVAL = 20;
+    var INTERVAL = 15;
     var DEBUG = false;
     var canvas;             // The canvas shown on the page.
     var ctx;
@@ -29,11 +29,21 @@
 
     let activeTile = undefined;
 
+    //Game Rules -->
+    var lives = 5;
+    var totalBugsAmount  =  3;  // for now this is added to each wave
+    var totalBugsKilled = 0;
+    gameRunning = true;
+    var waveNum = 1;          // current wave
+    let coins = 100;          // Starter coins for player
+    let tower1Cost = 30;      // cost of tower 1
+    let smallEnemyDrop = 10;  // how many coins the small enemy drops
+
     const backgroundImage = new Image();
     backgroundImage.src = "PNGs/Maps/Stage1TD.png";
 
     const bugSprite = new Image();
-    bugSprite.src = "PNGs/Enemies/Bug.png";
+    bugSprite.src = "PNGs/Enemies/BugRight.png";
 
     const tower1 = new Image();
     tower1.src = "PNGs/Towers/tower1-26resize.png";
@@ -41,9 +51,22 @@
     const towerprojectile = new Image();
     towerprojectile.src = "PNGs/Projectiles/tower1projectileresize.png";
 
+    const emptyHealthbar = new Image();
+    emptyHealthbar.src = "PNGs/UI/Empty_Barresize.png";
+    const greenBar = new Image();
+    greenBar.src = "PNGs/UI/Green_Barresize.png";
+
+    const playerLives = new Image();
+    playerLives.src = "PNGs/UI/Heartresize.png";
+
+    const coinSack = new Image();
+    coinSack.src = "PNGs/UI/Coin_Sackresize.png";
+
+
+
     // placementTilesMap is inside PlacementTiles.js
     // 2D array for the placement tiles with the symbol that associates them to be a valid placement tile (62 inside PlacementTiles.js)
-    const placementTilesSymbol2D = []
+    const placementTilesSymbol2D = [];
     for (let i = 0; i < placementTilesMap.length; i += 20) // increment by 20 because we have 20 columns, i.e how many tiles in each row
     {
       placementTilesSymbol2D.push(placementTilesMap.slice(i, i + 20));
@@ -67,17 +90,16 @@
       update(mouse)
       {
         this.draw();
-
-        if (mouse.x > this.position.x && mouse.x < this.position.x + this.size && mouse.y > this.position.y && mouse.y < this.position.y + this.size)
+        // if our mouse collides with a placement tile
+        if (mouse.x > this.position.x && mouse.x < this.position.x + this.size && mouse.y > this.position.y && mouse.y < this.position.y + this.size)  
         {
-          // console.log('colliding');
-          this.color = 'white';
+          this.color = 'rgba(255, 255, 255, 0.70)';
         }
         else this.color = 'rgba(255, 255, 255, 0.15)';
       }
 
     }
-    
+
     // Makes an array of placement tile objects that are the same row and column as portrayed in PlacementTiles.js
     const placementTiles = [];
     placementTilesSymbol2D.forEach((row, y) => {
@@ -92,15 +114,15 @@
         }
       })
     })
-    
+
 
     // Base class for all enemy types that are 64x64
-    class smallEnemy 
+    class smallEnemy
     {
-      constructor({ position = { x: 0, y: 0} })   // turns position into an object with x and y properties, each enemy object created must come with it's position 
+      constructor({ position = { x: 0, y: 0} })   // turns position into an object with x and y properties, each enemy object created must come with it's position
       {
         this.position = position;                 // Each enemy will have it's own individual position
-        this.width = 64;  
+        this.width = 64;
         this.height = 64;
         this.coordinateIndex = 0;                 // coordinate index inside stage1Path array
         this.center =                             // point at center of the sprite
@@ -109,8 +131,16 @@
           y: this.position.y + this.height / 2
         }
         this.radius = 32;
+        this.health = 100;
+        this.velocity =
+        {
+          x: 0,
+          y: 0
+        }
 
       }
+
+      
 
       // draw the small enemy
       draw()
@@ -122,6 +152,12 @@
         ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255, 0, 132, 0.15)';
         ctx.fill();
+
+        // health bar --> green bar over empty bar as the enemy takes damage and health decreases, the green bar's width is reduced
+        ctx.drawImage(emptyHealthbar, 0, 0, this.width, 8, this.position.x, this.position.y - 15, this.width, 8);
+        ctx.drawImage(greenBar, 0, 0, this.width, 8, this.position.x, this.position.y - 15, this.width * this.health / 100, 8);
+
+        
       }
 
       // move the small enemy based on the coordinates taken from stage1PathCoordinates.js
@@ -133,7 +169,12 @@
         const xDistance = coordinate.x - this.center.x;                // get the distance between the enemy x pos and next coordinate x pos
         const yDistance = coordinate.y - this.center.y;                // get the distance between the enemy y pos and next coordinate y pos
         const angle = Math.atan2(yDistance, xDistance);                  // angle at which to move along path
-        
+        const speed = 0.75;                                              // this value shoud be between 0 and 1
+
+        // we can make them slower, but not faster?????
+        // ok so i think the problem is the game is not updating faster than
+        // the enemies are moving so, to make them faster decrease interval var
+        // then slow down the other functions and animations
         this.position.x += Math.cos(angle);                              // update x position
         this.position.y += Math.sin(angle);                              // update y position
         this.center =                                                    // update center point
@@ -146,12 +187,29 @@
         // console.log(Math.round(this.center.x));
 
         // if the enemy has made it to the coordinate, move to the next coordinate                   && stop at last coordinate (off canvas)
+        if(this.position.x > 1280){
+          this.health = 0;
+           var index = enemies.indexOf(this);
+           enemies.splice(index,1);
+           lives--;
+           document.querySelector('#lives').innerHTML = lives;  // update the player lives ui
+          //  console.log(enemies);
+          //  console.log(lives);
+           if(lives <= 0){
+              Lose();
+             gameRunning = false;
+           }
+
+           //WRITE LOSE CONDTITION HERE
+        }
         if (Math.round(this.center.x) === coordinate.x && Math.round(this.center.y) === coordinate.y && this.coordinateIndex < stage1Path.length - 1)
         {
           this.coordinateIndex++;
-        }
+        }//
 
-      
+
+
+
       }
 
     }
@@ -171,7 +229,7 @@
           x: this.position.x + (this.width / 2) - 20,
           y: this.position.y
         }
-        this.projectiles = [];  // an array of new projectile objects with their own position properties          
+        this.projectiles = [];  // an array of new projectile objects with their own position properties
         this.radius = 300;      // radius of the vision sphere we create, inc/dec this value to adjust range of tower
         this.target;
         this.frames = 0;        // used for how fast the tower shoots
@@ -182,7 +240,7 @@
       {
         // draw the tower
         ctx.drawImage(tower1, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
-        
+
         // draw the vision sphere
         ctx.beginPath();
         ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
@@ -194,9 +252,9 @@
       {
         this.draw();
 
-        // push projectiles into the projectiles array every 50 frames && and if a target is within vision of tower
+        // push projectiles into the projectiles array every 100 frames && and if a target is within vision of tower
         // decrease or increase this number to adjust fire rate
-        if (this.frames % 50 === 0 && this.target)
+        if (this.frames % 100 === 0 && this.target)
         {
           this.projectiles.push(new Projectile({  // each building is responsible for it's own projectiles
             position: {
@@ -207,6 +265,7 @@
           }))
         }
         this.frames++;           // increments every tick cycle
+
       }
 
       // rotate()
@@ -224,12 +283,13 @@
         this.position = position;
         this.width = 31;
         this.height = 25;
-        this.velocity = 
+        this.velocity =
         {
           x: 0,
           y: 0
         }
         this.enemy = enemy;
+        this.damage = 10;
       }
 
       // this is drawing tower1 projectile
@@ -260,11 +320,18 @@
       }
     }
 
-    
+
 
 
     // const bugEnemy = new smallEnemy({ position: { x: stage1Path[0].x, y: stage1Path[0].y } });           // make a bug at positon x and y on the canvas
-    
+    function Lose(){
+//Lose Scrren Occurs here
+   alert("You Lose!!");
+    }
+    function Win(){
+       alert("You Win!!");
+       //Win Scrren Occurs here
+    }
     function drawStage()
     {
       ctx.drawImage(backgroundImage, 0, 0);                                          // draws the background of stage 1
@@ -289,28 +356,47 @@
 
     }
 
-    // fill enemies array up with bug enemies, the xOffset positions the next enemy a fixed distance away from the previous enemy
-    for (let i = 1; i < 10; i++)
+    
+
+    function spawnEnemies(totalBugsAmount) 
     {
-      const xOffset = i * 150;
-      enemies.push(new smallEnemy({ position: { x: stage1Path[0].x - xOffset, y: stage1Path[0].y } }));
+        // fill enemies array up with bug enemies, the xOffset positions the next enemy a fixed distance away from the previous enemy
+        for (let i = 1; i <= totalBugsAmount; i++) 
+        {
+          const xOffset = i * 150;
+          enemies.push(new smallEnemy({ position: { x: stage1Path[0].x - xOffset, y: stage1Path[0].y } }));
+        }
     }
+    spawnEnemies(totalBugsAmount);
+    // console.log(enemies);
 
     function Tick() {
-
+if(gameRunning){
       drawStage();
 
+      // draw heart UI
+      ctx.drawImage(playerLives, 0, 0, 24, 25, 1210, 18, 24, 25);
+
+      // draw coin sack UI
+      ctx.drawImage(coinSack, 0, 0, 36, 35, 20, 18, 36, 35);
+
       // for each bug enemy inside enemies array, move
-      enemies.forEach(smallEnemy => {
+      for (let i = enemies.length - 1; i >= 0; i--)
+      {
+        const smallEnemy = enemies[i];
         smallEnemy.move();
-      });
+      }
+
+      // enemies.forEach(smallEnemy => {
+      //   smallEnemy.move();
+      // })
 
       // for each tile in placementTiles array update the mouse over feature
       placementTiles.forEach(tile => {
         tile.update(mouse);
       })
 
-      tower.forEach(tower => 
+      tower.forEach(tower =>
       {
         tower.update();
         tower.target = null; // this is nothing before setting it i.e. tower targets nothing at first
@@ -321,30 +407,57 @@
           return distance < enemy.radius + tower.radius;  // return true if the enemy is inside the vision sphere of the tower
         })
         tower.target = enemyInRange[0]; // target the first enemy that comes within range of tower
-        
+        index = enemies.indexOf(enemyInRange[0]);
 
         // loop thru projectiles array from the end
         for (let i = tower.projectiles.length - 1; i >= 0; i--)
-        { 
+        {
           // for each tower move a projectile
           const projectile = tower.projectiles[i];
           projectile.move();
 
           // Check for collision with an enemy and if so, erase the projectile from the projectiles array
-          if (projectile.position.x > projectile.enemy.position.x && 
-              projectile.position.x < projectile.enemy.position.x + projectile.enemy.width && 
-              projectile.position.y > projectile.enemy.position.y && 
+          if (projectile.position.x > projectile.enemy.position.x &&
+              projectile.position.x < projectile.enemy.position.x + projectile.enemy.width &&
+              projectile.position.y > projectile.enemy.position.y &&
               projectile.position.y < projectile.enemy.position.y + projectile.enemy.height)
           {
             tower.projectiles.splice(i, 1);
+            //take damage
+            projectile.enemy.health -= projectile.damage;
+            // if(projectile.enemy.health <= 0 && index == enemies.indexOf(projectile.enemy)){
+            //     //fadasdf
+
+            //     enemies.splice(index, 1);                
+            //     // enemies.splice(i, 1);
+            //     totalBugsKilled++;
+            //     console.log(enemies);
+            // }
+            if(projectile.enemy.health <= 0){
+                //fadasdf
+                const index = enemies.findIndex((enemy) => {
+                  return projectile.enemy === enemy;
+                })
+                if (index > -1)
+                {
+                  enemies.splice(index, 1);
+                  totalBugsKilled++;
+                  coins += smallEnemyDrop;
+                  document.querySelector('#coins').innerHTML = coins;
+                }                 
+                
+                // console.log(enemies);
+
+            }
+        
           }
 
 
           // CIRCLES?!?
           //****************************************
           // each projectile will be assigned to an enemy in which the projectile is moving towards
-          // const xDifference = projectile.enemy.center.x - projectile.position.x;  
-          // const yDifference = projectile.enemy.center.y - projectile.position.y;  
+          // const xDifference = projectile.enemy.center.x - projectile.position.x;
+          // const yDifference = projectile.enemy.center.y - projectile.position.y;
           // const distance = Math.hypot(xDifference, yDifference);
 
           // console.log(distance);
@@ -359,10 +472,28 @@
 
       })
 
+      // if(totalBugsKilled >= totalBugsAmount){
+
+      //  gameRunning = false;
+      //   Win();
+      //   //Write Win Condition HERE
+      // }
+
+      if (enemies.length === 0) // if the enemy array is empty, move to the next wave and increase enemy count
+      {
+        waveNum++;
+        totalBugsAmount += 3;
+        spawnEnemies(totalBugsAmount);
+        console.log(waveNum);
+        if (lives > 0 && waveNum >= 4) // if player survives waves they win -- 3 waves for now
+        {
+          gameRunning = false;
+          Win();
+        }
+      }
       
+}
 
-
-    
     }
 
 
@@ -408,7 +539,7 @@
   //   }
 
 
-    function loadComplete() 
+    function loadComplete()
     {
       console.log("Load is complete.");
       canvas = document.getElementById("theCanvas");
@@ -420,10 +551,12 @@
       drawStage();
 
 
-      // This lets you click onto a placement tile and draw a tower
+      // This lets you click onto a placement tile and draw a tower ----> added coin functionality, if player cannot afford tower1Cost then it will not place
       // causes error if moved
       canvas.addEventListener('click', (event) => {
-        if (activeTile && !activeTile.occupied) {
+        if (activeTile && !activeTile.occupied && coins - tower1Cost >= 0) {
+          coins -= tower1Cost; // subtract player coins with tower cost
+          document.querySelector('#coins').innerHTML = coins;  // update the coin number UI
           tower.push(new Tower({
             position: {
               x: activeTile.position.x,
@@ -437,6 +570,8 @@
       
 
 
+
+
       // createTower(200,200,1);
       // createTower(100,100,1);
       // createTower(50,50,1);
@@ -448,7 +583,7 @@
 
     }
 
-    
+
     const mouse = {
       x: undefined,
       y: undefined
@@ -474,13 +609,16 @@
   </head>
 
  <body onload="loadComplete()" bgcolor="0f0000" text="#ffffff">
- 
 
-  <canvas id="theCanvas" tabindex="1" width="1280" height="768"></canvas>
-<!-- <h2 id="YouWin">This will update on kill</h2> -->
+  <div style="position: relative; display: inline-block">
+    <canvas id="theCanvas" tabindex="1" width="1280" height="768"></canvas> 
+    <div style="position: absolute; top: 5px; right: 10px; font-size: 36px; font-weight: bold; font-family: Georgia, 'Times New Roman', Times, serif; color: white; -webkit-text-stroke: 1.5px black;"><div id= "lives">5</div></div>
+    <div style="position: absolute; top: 14px; left: 65px; font-size: 36px; font-weight: bold; font-family: Georgia, 'Times New Roman', Times, serif; color: white; -webkit-text-stroke: 1.5px black;"><div id= "coins">100</div></div> 
+
+  </div>
+  
 
 
 
   </body>
 </html>
-
