@@ -31,33 +31,30 @@
 
             //Game Rules -->
             var lives = 5;
-              var towerImage ="PNGs/Towers/tower2-14.png";
-                let firerate = 1;
+            var towerImage ="PNGs/Towers/tower2-14.png";
+            let firerate = 1;
             var totalBugsAmount  =  3;  // for now this is added to each wave
             var totalBugsKilled = 0;
             var gameRunning = true;
             var playing = false;
             var waveNum = 1;          // current wave
             var maxWaveNum = 5;       // maximum number of waves
-            let coins = 300;          // Starter coins for player
+            let coins = 600;          // Starter coins for player
             let tower1Cost = 30;
             let damage = 10;
             let range = 300;
             let smallEnemyDrop = 10;  // how many coins the small enemy drops
             var currentTower = 1;
-
-            var level = 1;
             var tower1UpgradeCost = 50;
 
             var prompt = "Select Tower";
             var CANVASWIDTH = 1280;
             var CANVASHEIGHT = 768;
+            
             const backgroundImage = new Image();
             backgroundImage.src = "PNGs/Maps/Stage1TD.png";
             var BackgroundAudio = new Audio('Sound/BackgroundMusic.wav');
             var HitAudio = new Audio('Sound/EnemyHit.wav');
-            const bugSprite = new Image();
-            bugSprite.src = "PNGs/Enemies/Bug_00000.png";
 
             const tower1 = new Image();
             tower1.src = "PNGs/Towers/tower1-26resize.png";
@@ -71,33 +68,23 @@
             const towerprojectile4 = new Image();
             towerprojectile4.src = "PNGs/Projectiles/tower4projectile.png";
 
-
             const tower2 = new Image();
             tower2.src = "PNGs/Towers/tower2-14.png";
-
-
 
             const tower3 = new Image();
             tower3.src = "PNGs/Towers/tower3-12.png";
 
-
-
             const tower4 = new Image();
             tower4.src = "PNGs/Towers/tower4-9.png";
-
 
             const emptyHealthbar = new Image();
             emptyHealthbar.src = "PNGs/UI/Empty_Barresize.png";
             const greenBar = new Image();
             greenBar.src = "PNGs/UI/Green_Barresize.png";
-
             const playerLives = new Image();
-            playerLives.src = "PNGs/UI/Heartresize.png";
-
+            playerLives.src = "PNGs/UI/Heart64.png";
             const coinSack = new Image();
-            coinSack.src = "PNGs/UI/Coin_Sackresize.png";
-
-
+            coinSack.src = "PNGs/UI/Coin_Sack64.png";
 
 
               // Super class for most of the sprites in the game, this class takes care of animating the sprite sheets for the enemies and tower
@@ -133,13 +120,8 @@
                     height: this.image.height
                   }
 
-                // ctx.drawImage(this.image, this.position.x, this.position.y);
-
-                // ctx.drawImage(this.image, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
-
                 // draw the sprite image using the new crop
                 ctx.drawImage(this.image, crop.position.x, crop.position.y, crop.width, crop.height, this.position.x + this.offset.x, this.position.y + this.offset.y, crop.width, crop.height);
-
               }
 
               // function responsible for the animation
@@ -175,23 +157,16 @@
                 this.size = 64;
                 this.color = 'rgba(255, 255, 255, 0.15)';
                 this.occupied = false;
+                this.tileType;               
               }
 
               draw()
               {
-                // ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-
-                // ctx.lineWidth = 5;
-
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
                 ctx.fillStyle = this.color;
                 ctx.strokeRect(this.position.x, this.position.y, this.size, this.size);
                 ctx.fillRect(this.position.x, this.position.y, this.size, this.size);
-
-
-                // ctx.stroke();
-
               }
 
               update(mouse)
@@ -205,10 +180,7 @@
 
                 }
                 else this.color = 'rgba(255, 255, 255, 0.15)';
-
-
               }
-
             }
 
             // Makes an array of placement tile objects that are the same row and column as portrayed in PlacementTiles.js
@@ -256,7 +228,6 @@
                   x: 0,
                   y: 0
                 }
-
 
                 if (this.type == 1)                                // this.type == 1 is the pill bug enemy
                 {
@@ -306,32 +277,16 @@
                   this.speed = 0.85;
                   this.coinDrop = 40;
                 }
-
               }
-
 
               // draw the small enemy
               draw()
               {
-
                 super.draw();
-
-
-                // ctx.drawImage(this.image, crop.position.x, crop.position.y, crop.width, crop.height, this.position.x, this.position.y, crop.width, crop.height);
-
-                // ctx.drawImage(bugSprite, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
-
-                // draws a circle around the enemy, we can use this to look at collisions
-                // ctx.beginPath();
-                // ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
-                // ctx.fillStyle = 'rgba(255, 0, 132, 0.15)';
-                // ctx.fill();
 
                 // health bar --> green bar over empty bar as the enemy takes damage and health decreases, the green bar's width is reduced
                 ctx.drawImage(emptyHealthbar, 0, 0, this.width, 8, this.position.x, this.position.y - 15, this.width, 8);
                 ctx.drawImage(greenBar, 0, 0, this.width, 8, this.position.x, this.position.y - 15, this.width * this.health / this.maxHealth, 8);
-
-
               }
 
               // move the small enemy based on the coordinates taken from stage1PathCoordinates.js
@@ -346,11 +301,6 @@
                 const yDistance = coordinate.y - this.center.y;                // get the distance between the enemy y pos and next coordinate y pos
                 const angle = Math.atan2(yDistance, xDistance);                  // angle at which to move along path
 
-
-                // we can make them slower, but not faster?????
-                // ok so i think the problem is the game is not updating faster than
-                // the enemies are moving so, to make them faster decrease interval var
-                // then slow down the other functions and animations
                 this.position.x += Math.cos(angle) * this.speed;                              // update x position
                 this.position.y += Math.sin(angle) * this.speed;                              // update y position
                 this.center =                                                    // update center point
@@ -359,9 +309,6 @@
                   y: this.position.y + this.height / 2
                 }
 
-                // console.log(Math.round(this.position.x));
-                // console.log(Math.round(this.center.x));
-
                 // if the enemy reaches end of stage decrease a life from player and remove the enemy
                 if(this.position.x > 1280){
                   this.health = 0;
@@ -369,25 +316,18 @@
                    enemies.splice(index,1);
                    lives--;
 
-                  // document.querySelector('#lives').innerHTML = lives;  // update the player lives ui
-                  //  console.log(enemies);
-                  //  console.log(lives);
-
                   // when lives reach zero, player loses
-                   if(lives <= 0){
-                      Lose();
-                     gameRunning = false;
-                   }
-
+                   if (lives <= 0) {
+                        Lose();
+                        gameRunning = false;
+                    }
                 }
                 // if the enemy has made it to the coordinate, move to the next coordinate                   && stop at last coordinate (off canvas)
                 if (Math.round(this.center.x) === coordinate.x && Math.round(this.center.y) === coordinate.y && this.coordinateIndex < stage1Path.length - 1)
                 {
                   this.coordinateIndex++;
                 }
-
               }
-
             }
 
             function show_dialog(x)
@@ -404,28 +344,28 @@
 
                   // Show the prompt
                   if(x==1){
-                    tower1Cost = 15;
-                    damage = 15;
+                    tower1Cost = 20;
+                    damage = 25;
                     range = 275;
                     firerate = 3;
                     towerImage = tower1.src;
                   }
                   if(x==2){
-                    tower1Cost = 60;
-                    damage = 60;
+                    tower1Cost = 30;
+                    damage = 30;
                     range = 200;
                     firerate= 2;
                     towerImage = tower2.src;
                   }
                   if(x==3){
-                    tower1Cost = 75;
-                    damage = 40;
+                    tower1Cost = 50;
+                    damage = 50;
                     range = 400;
                     firerate = 1;
                       towerImage = tower3.src;
                   }
                   if(x==4){
-                    tower1Cost = 120;
+                    tower1Cost = 100;
                     damage = 20;
                     range = 350;
                     firerate = 5;
@@ -450,7 +390,6 @@
                   // Make sure that this does not show more options than supported (4).
 
                 }
-
               }
 
               function whenKeyPressed(key) {
@@ -482,12 +421,7 @@
 
                 break;
             }
-            // Call the function to process this input in the context of the prompt
-            // (i.e. further the player's conversation)
-          //  processResponse(currentPhase);
-            //if(optionKeyIndex)
           }
-
 
             class Tower extends Sprite {
                 constructor({ position = { x: 0, y: 0 }, type }) // each tower has a type
@@ -504,47 +438,18 @@
                   // this bit is for checking which tower type, then drawing and animating that tower with these necessary SPECIFIC tower properties
                   if (this.type == 1)                                         // type == 1 is tower1
                   {
-                        // this.level = 1;
-                        this.width = 128;                                         // specific for this tower sprite sheet
-                        this.height = 138;                                        // specific for this tower sprite sheet
-                        this.image.src = 'PNGs/Towers/tower1spritesheet.png';      // which spritesheet to display
-                        this.frames.max = 54;                                     // specific maximum number frames for this sprite sheet
-                        this.frames.fire = 26;                                    // specific frame at which the projectile is fired in this sprite sheet
-                        this.frames.hold = 5; //**FIRERATE**//                    // this is basically fire rate, projectiles will only fire at top of tower animation, dec/inc to fire faster/slower
-                        this.offset.x = 0;
-                        this.offset.y = -75                                       // specific offsets so the sprite is drawn from the bottom
-                        
-
-
-                        // if (this.level == 2) 
-                        // {
-                        //     this.width = 128;
-                        //     this.height = 146;
-                        //     this.image.src = 'PNGs/Towers/Lvl2tower1spritesheet.png';    // Tower 1 Level 2
-                        //     this.frames.max = 40;
-                        //     this.frames.fire = 19;
-                        //     this.frames.hold = 4;  //**FIRERATE**//
-                        //     this.offset.x = 0;
-                        //     this.offset.y = -75;
-                        //     this.radius = 300;
-                        // }
-
-                        // if (this.level == 3) 
-                        // {
-                        //     this.width = 128;
-                        //     this.height = 146;
-                        //     this.image.src = 'PNGs/Towers/Lvl2tower1spritesheet.png';    // Tower 1 Level 2
-                        //     this.frames.max = 40;
-                        //     this.frames.fire = 19;
-                        //     this.frames.hold = 4;  //**FIRERATE**//
-                        //     this.offset.x = 0;
-                        //     this.offset.y = -75;
-                        // }
-                   }
+                    // this.level = 1;
+                    this.width = 128;                                         // specific for this tower sprite sheet
+                    this.height = 138;                                        // specific for this tower sprite sheet
+                    this.image.src = 'PNGs/Towers/tower1spritesheet.png';      // which spritesheet to display
+                    this.frames.max = 54;                                     // specific maximum number frames for this sprite sheet
+                    this.frames.fire = 26;                                    // specific frame at which the projectile is fired in this sprite sheet
+                    this.frames.hold = 5; //**FIRERATE**//                    // this is basically fire rate, projectiles will only fire at top of tower animation, dec/inc to fire faster/slower
+                    this.offset.x = 0;
+                    this.offset.y = -75                                       // specific offsets so the sprite is drawn from the bottom
+                  }
                   if (this.type == 5)
                   {
-                    // currentTower = 5;
-
                     this.width = 128;
                     this.height = 146;
                     this.image.src = 'PNGs/Towers/Lvl2tower1spritesheet.png';    // Tower 1 Level 2
@@ -553,6 +458,7 @@
                     this.frames.hold = 4;  //**FIRERATE**//
                     this.offset.x = 0;
                     this.offset.y = -75;
+                    this.radius = 300;
                   }
                   if (this.type == 6)
                   {
@@ -564,6 +470,7 @@
                     this.frames.hold = 3;  //**FIRERATE**//
                     this.offset.x = 0;
                     this.offset.y = -75;
+                    this.radius = 325;
                   }
                    if (this.type == 2)
                   {
@@ -587,7 +494,7 @@
                     this.frames.hold = 8;  //**FIRERATE**//
                     this.offset.x = 0;
                     this.offset.y = -60;
-
+                    this.radius = 225;
                   }
                   if (this.type == 8)
                   {
@@ -598,7 +505,8 @@
                     this.frames.fire = 19;
                     this.frames.hold = 7;  //**FIRERATE**//
                     this.offset.x = 0;
-                    this.offset.y = -60;
+                    this.offset.y = -80;
+                    this.radius = 250;
                   }
                   if (this.type == 3)
                   {
@@ -621,6 +529,7 @@
                     this.frames.hold = 14;   //**FIRERATE**//
                     this.offset.x = 0;
                     this.offset.y = -115;
+                    this.radius = 450;
                   }
                   if (this.type == 10)
                   {
@@ -632,6 +541,7 @@
                     this.frames.hold = 13;   //**FIRERATE**//
                     this.offset.x = 0;
                     this.offset.y = -115;
+                    this.radius = 500;
                   }
                   if (this.type == 4)
                   {
@@ -640,7 +550,7 @@
                     this.image.src = 'PNGs/Towers/tower4spritesheet.png';
                     this.frames.max = 20;
                     this.frames.fire = 9;
-                    this.frames.hold = 3;    //**FIRERATE**//
+                    this.frames.hold = 4;    //**FIRERATE**//
                     this.offset.x = 0;
                     this.offset.y = -65;
                   }
@@ -651,9 +561,10 @@
                     this.image.src = 'PNGs/Towers/Lvl2tower4spritesheet.png';      //Tower 4 level 2
                     this.frames.max = 28;
                     this.frames.fire = 13;
-                    this.frames.hold = 2;    //**FIRERATE**//
+                    this.frames.hold = 3;    //**FIRERATE**//
                     this.offset.x = 0;
-                    this.offset.y = -65;
+                    this.offset.y = -75;
+                    this.radius = 390;
                   }
                   if (this.type == 12)
                   {
@@ -662,9 +573,10 @@
                     this.image.src = 'PNGs/Towers/Lvl3tower4spritesheet.png';      //Tower 4 level 3
                     this.frames.max = 28;
                     this.frames.fire = 13;
-                    this.frames.hold = 1.5;    //**FIRERATE**//
+                    this.frames.hold = 2;    //**FIRERATE**//
                     this.offset.x = 0;
-                    this.offset.y = -65;
+                    this.offset.y = -75;
+                    this.radius = 425;
                   }
                   this.center = {
                     x: this.position.x + this.offset.x + (this.width / 2) ,      // updated due to offsets
@@ -674,7 +586,7 @@
                   // this is the position that we want the projectile to spawn at the height of the tower animation
                   // specific for each tower and projectile
                   this.projectileSpawnPoint = {};
-                  if (this.type == 1)
+                  if (this.type == 1 || this.type == 5 || this.type == 6)
                   {
                     // this is exactly where we want to spawn the projectile for tower1
                     this.projectileSpawnPoint =
@@ -683,7 +595,7 @@
                       y: this.position.y + (this.height / 2) - 145
                     };
                   }
-                  else if (this.type == 2)
+                  else if (this.type == 2 || this.type == 7 || this.type == 8)
                   {
                     this.projectileSpawnPoint =
                     {
@@ -691,7 +603,7 @@
                       y: this.position.y + (this.height / 2) - 125
                     };
                   }
-                  else if (this.type == 3)
+                  else if (this.type == 3 || this.type == 9 || this.type == 10)
                   {
                     this.projectileSpawnPoint =
                     {
@@ -699,7 +611,7 @@
                       y: this.position.y + (this.height / 2) - 210
                     };
                   }
-                  else if (this.type == 4)
+                  else if (this.type == 4 || this.type == 11 || this.type == 12)
                   {
                     this.projectileSpawnPoint =
                     {
@@ -708,33 +620,15 @@
                     };
                   }
                   this.projectiles = [];  // an array of new projectile objects with their own position properties
-                 
+
                   this.target;
                   this.elapsedSpawnTime = 0;        // used for how fast the tower shoots
-
                 }
 
                 draw()
                 {
-
                   super.draw();
-
-                  // draw the tower
-                  // if (this.type == 1)
-                  // {
-                  //   ctx.drawImage(tower1, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
-                  // }
-                  // else if (this.type == 2)
-                  // {
-                  //   ctx.drawImage(tower2, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
-                  // } else if (this.type == 3) {
-                  //   ctx.drawImage(tower3, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
-                  // } else if (this.type == 4) {
-                  //   ctx.drawImage(tower4, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
-                  // }
-
                 }
-
 
                 update(mouse)
                 {
@@ -760,7 +654,6 @@
                       mouse.y < this.position.y + this.height + this.offset.y)
                   {
 
-
                     // vision sphere
                     ctx.strokeStyle = 'rgba(0, 220, 255, 0.6)';
                     ctx.fillStyle = 'rgba(0, 220, 255, 0.15)';
@@ -770,13 +663,13 @@
                     ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
                     ctx.stroke();
                     ctx.fill();
+
                   }
                   else
                   {
                     ctx.fillStyle = 'rgba(0, 220, 255, 0)'; // set to transparent when not moused over
                     ctx.fill();
                   }
-
                 }
 
                 fireProjectile()
@@ -793,13 +686,6 @@
                     coinDrop: this.coinDrop
                   }))
                 }
-
-                // rotate()
-                // {
-                //   var angle = Math.atan2(mouse.y - this.position.y, mouse.x - this.position.x) / Math.PI * 180;
-                //   this.rotation = angle;
-                // }
-
               }
 
             class Projectile extends Sprite
@@ -821,22 +707,19 @@
                 this.enemy = enemy;
                 this.damage = damages;
                 this.coinDrop = coinDrop;
-
               }
 
               // this is drawing tower projectiles
               draw()
               {
-
                 // super.draw();
-
-                // ctx.drawImage(towerprojectile, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
 
                 // depending on type of tower, draw image of it's specific projectile
                 if (this.type == 1)
                 {
                   this.width = 31;
                   this.height = 25;
+                  this.damage = 25;
                   this.speed = 4;   // specific speed of this projectile
                   ctx.drawImage(towerprojectile, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
@@ -844,6 +727,7 @@
                 {
                   this.width = 37;
                   this.height = 33;
+                  this.damage = 30;
                   this.speed = 4;
                   ctx.drawImage(towerprojectile2, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
@@ -851,6 +735,7 @@
                 {
                   this.width = 91;
                   this.height = 48;
+                  this.damage = 50;
                   this.speed = 4;
                   ctx.drawImage(towerprojectile3, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
@@ -858,6 +743,71 @@
                 {
                   this.width = 28;
                   this.height = 64;
+                  this.damage = 20;
+                  this.speed = 4;
+                  ctx.drawImage(towerprojectile4, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+                }
+                else if (this.type == 5)
+                {
+                  this.width = 31;
+                  this.height = 25;
+                  this.damage = 35;
+                  this.speed = 4;   // specific speed of this projectile
+                  ctx.drawImage(towerprojectile, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+                }
+                else if (this.type == 6)
+                {
+                  this.width = 31;
+                  this.height = 25;
+                  this.damage = 50;
+                  this.speed = 4;   // specific speed of this projectile
+                  ctx.drawImage(towerprojectile, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+                }
+                else if (this.type == 7)
+                {
+                  this.width = 37;
+                  this.height = 33;
+                  this.damage = 50;
+                  this.speed = 4;
+                  ctx.drawImage(towerprojectile2, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+                }
+                else if (this.type == 8)
+                {
+                  this.width = 37;
+                  this.height = 33;
+                  this.damage = 75;
+                  this.speed = 4;
+                  ctx.drawImage(towerprojectile2, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+                }
+                else if (this.type == 9)
+                {
+                  this.width = 91;
+                  this.height = 48;
+                  this.damage = 75;
+                  this.speed = 4;
+                  ctx.drawImage(towerprojectile3, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+                }
+                else if (this.type == 10)
+                {
+                  this.width = 91;
+                  this.height = 48;
+                  this.damage = 100;
+                  this.speed = 4;
+                  ctx.drawImage(towerprojectile3, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+                }
+                else if (this.type == 11)
+                {
+                  this.width = 28;
+                  this.height = 64;
+                  this.damage = 30;
+                  this.speed = 4;
+                  ctx.drawImage(towerprojectile4, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
+                }
+                else if (this.type == 12)
+                {
+                  this.width = 28;
+                  this.height = 64;
+                  this.damage = 45;
                   this.speed = 4;
                   ctx.drawImage(towerprojectile4, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
@@ -870,53 +820,29 @@
                 // just like with the enemy movement we want the angle of the projectile and the enemies
                 const angle = Math.atan2(this.enemy.center.y - this.position.y, this.enemy.center.x - this.position.x );
 
-
                 this.velocity.x = Math.cos(angle) * this.speed;    // push the projectile on the x axis towards the enemy
                 this.velocity.y = Math.sin(angle) * this.speed;    // push the projectile on the y axis towards the enemy
 
                 this.position.x += this.velocity.x;   // move the projectile's x
                 this.position.y += this.velocity.y;   // move the projectile's y
-
               }
             }
 
             // const bugEnemy = new smallEnemy({ position: { x: stage1Path[0].x, y: stage1Path[0].y } });           // make a bug at positon x and y on the canvas
-            function Lose()
-            {
-              //Lose Scrren Occurs here
-              BackgroundAudio.pause();
-              alert("You Lose!!");
-              
+            function Lose() {
+                //Lose Screen Occurs here
+                BackgroundAudio.pause();
+                alert("You Lose!!");
             }
+
             function Win()
             {
                BackgroundAudio.pause();
                alert("You Win!!");
-               
-               //Win Scrren Occurs here
             }
             function drawStage()
             {
               ctx.drawImage(backgroundImage, 0, 0);                                          // draws the background of stage 1
-            }
-
-            function createTower(xs,ys,types){
-              var spriteImage = new Image();
-              spriteImage.src = "PNGs/Towers/Level_1-4.png";
-              const newtower = {type:types, x:xs, y:ys,damage:1,range:10,spriteImage:spriteImage,height:128,width:64};
-                tower[tower.length] = newtower;
-
-
-            }
-
-            function createEnemy(types){
-              xs = 0;
-              ys= 450;
-              var spriteImage = new Image();
-              spriteImage.src = "PNGs/Enemies/Fly.png";
-              const newenemy = {type:types, x:xs, y:ys,speed:1,spriteImage:spriteImage,height:64,width:64,health:100};
-                enemies[enemies.length] = newenemy;
-
             }
 
             function spawnEnemies(totalBugsAmount, enemyType)
@@ -933,7 +859,7 @@
 
             // console.log(enemies);
             if(gameRunning){
-            document['onkeydown'] = function(event) {
+              document['onkeydown'] = function(event) {
 
               event = event || window.event;
               var key = event.which || event.cursor;
@@ -957,7 +883,6 @@
             };
           }
 
-
             function Tick() {
 
                     if (gameRunning) {
@@ -965,24 +890,23 @@
                         drawStage();
                         show_dialog(currentTower);
                         ctx.fillStyle = "white";
-                        ctx.font = "bold 30px Arial";
+                        ctx.font = "bold 64px Arial";
 
                         // draw heart UI
-                        ctx.drawImage(playerLives, 0, 0, 24, 25, 1210, 18, 24, 25);
-                        ctx.fillText(lives.toString(), 1245, 45);
+                        ctx.drawImage(playerLives, 0, 0, 61, 64, 1150, 18, 61, 64);
+                        ctx.fillText(lives.toString(), 1225, 75);
                         // draw coin sack UI
-                        ctx.drawImage(coinSack, 0, 0, 36, 35, 20, 18, 36, 35);
-                        ctx.fillText(coins.toString(), 55, 45);
+                        ctx.drawImage(coinSack, 0, 0, 64, 62, 20, 18, 64, 62);
+                        ctx.fillText(coins.toString(), 90, 75);
                         // draw waves UI
-                        ctx.fillText("Wave " + waveNum + "/" + maxWaveNum, (1245 + 55) / 2, 45)
+                        ctx.fillText("Wave " + waveNum + "/" + maxWaveNum, (1050 + 55) / 2, 75)
 
                         // for each tile in placementTiles array update the mouse over feature
                         placementTiles.forEach(tile => {
                             tile.update(mouse);
                         })
 
-
-                        if (playing) 
+                        if (playing)
                         {
                             //Play background music
                             if( BackgroundAudio.currentTime == 0 || BackgroundAudio.ended || BackgroundAudio.paused)
@@ -994,12 +918,6 @@
                                 const smallEnemy = enemies[i];
                                 smallEnemy.move();
                             }
-
-                            // enemies.forEach(smallEnemy => {
-                            //   smallEnemy.move();
-                            // })
-
-                            
 
                             tower.forEach(tower => {
                                 tower.update(mouse);
@@ -1032,16 +950,9 @@
                                             HitAudio.play();
                                         }
                                         HitAudio.play();
-                                        // if(projectile.enemy.health <= 0 && index == enemies.indexOf(projectile.enemy)){
-                                        //     //fadasdf
-
-                                        //     enemies.splice(index, 1);
-                                        //     // enemies.splice(i, 1);
-                                        //     totalBugsKilled++;
-                                        //     console.log(enemies);
-                                        // }
+                                        
+                                        // if enemy has no more health, erase from game
                                         if (projectile.enemy.health <= 0) {
-                                            //fadasdf
                                             const index = enemies.findIndex((enemy) => {
                                                 return projectile.enemy === enemy;
                                             })
@@ -1049,45 +960,15 @@
                                                 enemies.splice(index, 1);
                                                 totalBugsKilled++;
                                                 coins += projectile.enemy.coinDrop;
-                                                // document.querySelector('#coins').innerHTML = coins;
                                             }
-
-                                            // console.log(enemies);
-
                                         }
-
                                     }
-
-                                    // CIRCLES?!?
-                                    //****************************************
-                                    // each projectile will be assigned to an enemy in which the projectile is moving towards
-                                    // const xDifference = projectile.enemy.center.x - projectile.position.x;
-                                    // const yDifference = projectile.enemy.center.y - projectile.position.y;
-                                    // const distance = Math.hypot(xDifference, yDifference);
-
-                                    // console.log(distance);
-
-                                    // if (distance < projectile.enemy.center + projectile.x)
-                                    // {
-                                    //   tower.projectiles.splice(i, 1);
-                                    // }
-                                    //*******************************************
-
                                 }
-
                             })
-
-                            // if(totalBugsKilled >= totalBugsAmount){
-
-                            //  gameRunning = false;
-                            //   Win();
-                            //   //Write Win Condition HERE
-                            // }
-
 
                             // if the enemy array is empty, move to the next wave and increase enemy count
                             // spawn the specific enemies we want for the wave
-                            if (enemies.length === 0) 
+                            if (enemies.length === 0)
                             {
                                 waveNum++;
 
@@ -1107,59 +988,15 @@
                                     spawnEnemies(totalBugsAmount, 4);
                                     totalBugsAmount = 3;
                                 }
-                                // console.log(waveNum);
                                 if (lives > 0 && waveNum >= maxWaveNum + 1) // if player survives waves they win -- 5 waves for now
                                 {
                                     gameRunning = false;
                                     Win();
                                 }
                             }
-
                         }
                     }
-
                 }
-
-            // function Tick2(){
-            //   createEnemy(1);
-            //   }
-
-        // function drawEnemies(){
-
-        //   for(let i = 0;i<enemies.length;i++){
-        //         ctx.clearRect(enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height);
-        //       enemies[i].x += enemies[i].speed;
-
-        //       ctx.drawImage(enemies[i].spriteImage,0*enemies[i].width,0*enemies[i].height,enemies[i].width,enemies[i].height,enemies[i].x,enemies[i].y,enemies[i].width,enemies[i].height);
-        // //make it so if it hits edge it gets deleted
-        //     }
-
-        // }
-          // function  drawTowers(){
-          //     for(let i = 0;i<tower.length;i++){
-          //         ctx.drawImage(tower[i].spriteImage,0*tower[i].width,0*tower[i].height,tower[i].width,tower[i].height,tower[i].x,tower[i].y,tower[i].width,tower[i].height)
-          //         const whatToRemove = [];
-          //         for(let j=0;j<enemies.length;j++){
-
-          //           if((enemies[j].x <= (tower[i].x + (((tower[i].width))*tower[i].range))) && (enemies[j].x  >= (tower[i].x - (((tower[i].width))*tower[i].range))) && (enemies[j].y <= (tower[i].y + (((tower[i].height))*tower[i].range))) && (enemies[j].y >= (tower[i].y - (((tower[i].height))*tower[i].range)))){
-          //             enemies[j].health -= tower[i].damage;
-          //              document.getElementById("YouWin").innerHTML = (count+ "-killed " + enemies.length);
-          //             if(enemies[j].health <= 0){
-          //               ctx.clearRect(enemies[j].x, enemies[j].y, enemies[j].width, enemies[j].height);
-          //               whatToRemove[whatToRemove.length] = j;
-          //             }
-          //             break;
-          //           }
-
-          //         }
-          //         for(let j = 0; j<whatToRemove.length; j++){
-          //          enemies.splice(whatToRemove[j],1);
-          //          count++;
-          //         }
-          //         whatToRemove.length = 0;
-
-          //     }
-          //   }
 
             function loadComplete()
             {
@@ -1174,84 +1011,196 @@
 
               // This lets you click onto a placement tile and draw a tower ----> added coin functionality, if player cannot afford tower1Cost then it will not place
               // causes error if moved
-              canvas.addEventListener('click', (event) => 
+              canvas.addEventListener('click', (event) =>
               {
                 playing = true;
-                if (activeTile && !activeTile.occupied && coins - tower1Cost >= 0) 
+                if (activeTile && !activeTile.occupied && coins - tower1Cost >= 0)
                 {
+                    // sub player coins with tower cost
                   coins -= tower1Cost;
 
-                  // subtract player coins with tower cost
-                  //  document.querySelector('#coins').innerHTML = coins;  // update the coin number UI
                   //spawnTower
                   tower.push(new Tower({
                     position: {
                       x: activeTile.position.x,
                       y: activeTile.position.y
-                    }, 
-                    type: currentTower, // push tower into tower array with placement tiles position
-                    // level: 1
+                    },
+                    type: currentTower // push tower into tower array with placement tiles position
 
                   }))
                   activeTile.occupied = true;  // this keeps from placing more than one turret on a placement tile
                   type = currentTower;
-                //   level = level;
-                //   console.log(level);
-
-                  
-                    
-
+                  activeTile.tileType = currentTower;
+                //   tower.sort((a, b) => {
+                //     return a.position.y - b.position.y
+                //   })
 
                 }
+                    // pop() will only takwe the most recent tower to upgrade it.
+                else if (activeTile && activeTile.occupied && this.type == 1 && coins >= 40 && activeTile.tileType == 1 && currentTower == 1) //upgrade tower 1 to lvl 2
+                {
+                    coins -= 40;
+                    tower.pop();             // erase previous level tower
+                    tower.push(new Tower({   // new tower at next level
+                    position: {
+                        x: activeTile.position.x,
+                        y: activeTile.position.y
+                    },
+                    damage: 35,      // new damage
+                    radius: 300,     // new range
+                    type: 5
+                    }))
+                    type = 5;     // need to set placement tile type or fail
+                    activeTile.tileType = 5;
+                    // tower.sort((a, b) => {
+                    //     return a.position.y - b.position.y
+                    // })                    
+                }
 
-                // else if (activeTile && activeTile.occupied && level == 1 && coins - tower1UpgradeCost >= 0)
-                // {
-                    
-                //     tower.push(new Tower({
-                //     position: {
-                //       x: activeTile.position.x,
-                //       y: activeTile.position.y
-                //     }, 
-                //     type: 1, // push tower into tower array with placement tiles position
-                //     level: 2
+                else if (activeTile && activeTile.occupied && this.type == 5 && coins >= 80 && activeTile.tileType == 5 && currentTower == 1) //upgrade tower 1 to lvl 3
+                {
+                    coins -= 80;
+                    tower.pop();
+                    tower.push(new Tower({
+                    position: {
+                        x: activeTile.position.x,
+                        y: activeTile.position.y
+                    },
+                    damage: 50,
+                    radius: 325,
+                    type: 6
+                    }))
+                    type = 6;
+                    activeTile.tileType = 6;
+                //     tower.sort((a, b) => {
+                //         return a.position.y - b.position.y
+                //   })
+                }
+                else if (activeTile && activeTile.occupied && this.type == 2 && coins >= 60 && activeTile.tileType == 2 && currentTower == 2) //upgrade tower 2 to lvl 2
+                {
+                    coins -= 60;
+                    tower.pop();
+                    tower.push(new Tower({
+                    position: {
+                        x: activeTile.position.x,
+                        y: activeTile.position.y
+                    },
+                    damage: 50,
+                    radius: 225,
+                    type: 7
+                    }))
+                    type = 7;
+                    activeTile.tileType = 7;
+                //     tower.sort((a, b) => {
+                //         return a.position.y - b.position.y
+                //   })
+                }
 
-                //   }))
-                    
-                    
-                // }
+                else if (activeTile && activeTile.occupied && this.type == 7 && coins >= 120 && activeTile.tileType == 7 && currentTower == 2) //upgrade tower 2 to lvl 3
+                {
+                    coins -= 120;
+                    tower.pop();
+                    tower.push(new Tower({
+                    position: {
+                        x: activeTile.position.x,
+                        y: activeTile.position.y
+                    },
+                    damage: 75,
+                    radius: 250,
+                    type: 8
+                    }))
+                    type = 8;
+                    activeTile.tileType = 8;
+                //     tower.sort((a, b) => {
+                //         return a.position.y - b.position.y
+                //   })
+                }
 
-                // if (activeTile && activeTile.occupied && level == 1 && coins - tower1UpgradeCost >= 0)
-                // {
-                //     tower.push(new Tower({
-                //     position: {
-                //       x: activeTile.position.x,
-                //       y: activeTile.position.y
-                //     }, 
-                //     type: 5 // push tower into tower array with placement tiles position
-                //     // level: 1
+                else if (activeTile && activeTile.occupied && this.type == 3 && coins >= 100 && activeTile.tileType == 3 && currentTower == 3) //upgrade tower 3 to lvl 2
+                {
+                    coins -= 100;
+                    tower.pop();
+                    tower.push(new Tower({
+                    position: {
+                        x: activeTile.position.x,
+                        y: activeTile.position.y
+                    },
+                    damage: 75,
+                    radius: 450,
+                    type: 9
+                    }))
+                    type = 9;
+                    activeTile.tileType = 9;
+                //     tower.sort((a, b) => {
+                //         return a.position.y - b.position.y
+                //   })
+                }
 
-                //   }))
-                    
+                else if (activeTile && activeTile.occupied && this.type == 9 && coins >= 200 && activeTile.tileType == 9 && currentTower == 3) //upgrade tower 3 to lvl 3
+                {
+                    coins -= 200;
+                    tower.pop();
+                    tower.push(new Tower({
+                    position: {
+                        x: activeTile.position.x,
+                        y: activeTile.position.y
+                    },
+                    damage: 100,
+                    radius: 500,
+                    type: 10
+                    }))
+                    type = 10;
+                    activeTile.tileType = 10;
+                //     tower.sort((a, b) => {
+                //         return a.position.y - b.position.y
+                //   })
+                }
 
+                else if (activeTile && activeTile.occupied && this.type == 4 && coins >= 200 && activeTile.tileType == 4 && currentTower == 4) //upgrade tower 4 to lvl 2
+                {
+                    coins -= 200;
+                    tower.pop();
+                    tower.push(new Tower({
+                    position: {
+                        x: activeTile.position.x,
+                        y: activeTile.position.y
+                    },
+                    damage: 30,
+                    radius: 390,
+                    type: 11
+                    }))
+                    type = 11;
+                    activeTile.tileType = 11;
+                //     tower.sort((a, b) => {
+                //         return a.position.y - b.position.y
+                //   })
+                }
 
-                // }
-
-                
-
-                
-
-
-
-
-
+                else if (activeTile && activeTile.occupied && this.type == 11 && coins >= 400 && activeTile.tileType == 11 && currentTower == 4) //upgrade tower 4 to lvl 3
+                {
+                    coins -= 400;
+                    tower.pop();
+                    tower.push(new Tower({
+                    position: {
+                        x: activeTile.position.x,
+                        y: activeTile.position.y
+                    },
+                    damage: 45,
+                    radius: 425,
+                    type: 12
+                    }))
+                    type = 12;
+                    activeTile.tileType = 12;
+                //     tower.sort((a, b) => {
+                //         return a.position.y - b.position.y
+                //   })
+                }
               })
-              
-
 
               myInterval = self.setInterval(function () { Tick() }, INTERVAL);
-              // myInterval2 = self.setInterval(function(){Tick2()}, INTERVAL*100);
             }
-            const mouse = 
+
+            const mouse =
             {
               x: undefined,
               y: undefined
@@ -1269,7 +1218,7 @@
                   {
                     activeTile = tile;
                     // console.log(currentTower);
-                    // console.log(activeTile.occupied);
+                    console.log("Active Tile Type: " + activeTile.tileType);
                     // console.log(this.type);
                     break;
                   }
@@ -1293,8 +1242,6 @@
             float: right;
         }
 
-        #imaging {
-        }
     </style>
 </head>
 
