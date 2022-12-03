@@ -242,7 +242,7 @@
                   this.health = 125;                               // this enemy's health
                   this.maxHealth = 125;                            // this enemy's max health
                   this.speed = 0.60;                               // this enemy's speed **should always be between 0 and 1** (or bad things happen)
-                  this.coinDrop = 6;                              // this enemy's coin drop
+                  this.coinDrop = 8;                              // this enemy's coin drop
                 }
                 if (this.type == 2)
                 {
@@ -278,7 +278,7 @@
                   this.health = 450;
                   this.maxHealth = 450;     //**Good Speed & Health**//
                   this.speed = 0.9;
-                  this.coinDrop = 40;
+                  this.coinDrop = 30;
                 }
               }
 
@@ -347,39 +347,39 @@
 
                   // Show the prompt
                   if(x==1){
-                    towerCost = 20;
+                    towerCost = 30;
                     damage = 25;
                     range = 275;
                     firerate = 3;
-                    lvl2UpgradeCost = 40;
-                    lvl3UpgradeCost = 80;
+                    lvl2UpgradeCost = 45;
+                    lvl3UpgradeCost = 100;
                     towerImage = tower1.src;
                   }
                   if(x==2){
-                    towerCost = 30;
-                    damage = 30;
+                    towerCost = 40;
+                    damage = 70;
                     range = 200;
                     firerate= 2;
-                    lvl2UpgradeCost = 60;
-                    lvl3UpgradeCost = 120;
+                    lvl2UpgradeCost = 50;
+                    lvl3UpgradeCost = 100;
                     towerImage = tower2.src;
                   }
                   if(x==3){
-                    towerCost = 50;
+                    towerCost = 60;
                     damage = 50;
                     range = 400;
                     firerate = 1;
-                    lvl2UpgradeCost = 100;
-                    lvl3UpgradeCost = 200;
+                    lvl2UpgradeCost = 90;
+                    lvl3UpgradeCost = 170;
                     towerImage = tower3.src;
                   }
                   if(x==4){
-                    towerCost = 100;
+                    towerCost = 80;
                     damage = 20;
                     range = 350;
                     firerate = 5;
                     lvl2UpgradeCost = 150;
-                    lvl3UpgradeCost = 300;
+                    lvl3UpgradeCost = 275;
                     towerImage= tower4.src;
                   }
                   line = prompt;
@@ -497,7 +497,7 @@
                     this.image.src = 'PNGs/Towers/tower2spritesheet.png';
                     this.frames.max = 30;
                     this.frames.fire = 14;
-                    this.frames.hold = 9;  //**FIRERATE**//
+                    this.frames.hold = 7;  //**FIRERATE**//
                     this.offset.x = 0;
                     this.offset.y = -60;
 
@@ -509,7 +509,7 @@
                     this.image.src = 'PNGs/Towers/Lvl2tower2spritesheet.png';      // Tower 2 level 2
                     this.frames.max = 32;
                     this.frames.fire = 15;
-                    this.frames.hold = 8;  //**FIRERATE**//
+                    this.frames.hold = 6;  //**FIRERATE**//
                     this.offset.x = 0;
                     this.offset.y = -60;
                     this.radius = 225;
@@ -521,7 +521,7 @@
                     this.image.src = 'PNGs/Towers/Lvl3tower2spritesheet.png';      //Tower 2 level 3
                     this.frames.max = 40;
                     this.frames.fire = 19;
-                    this.frames.hold = 7;  //**FIRERATE**//
+                    this.frames.hold = 5;  //**FIRERATE**//
                     this.offset.x = 0;
                     this.offset.y = -80;
                     this.radius = 250;
@@ -745,7 +745,7 @@
                 {
                   this.width = 37;
                   this.height = 33;
-                  this.damage = 30;
+                  this.damage = 70;
                   this.speed = 4;
                   ctx.drawImage(towerprojectile2, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
@@ -781,23 +781,23 @@
                   this.speed = 4;   // specific speed of this projectile
                   ctx.drawImage(towerprojectile, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
-                else if (this.type == 7)
+                else if (this.type == 7) // tower 2 level 2
                 {
                   this.width = 37;
                   this.height = 33;
-                  this.damage = 50;
+                  this.damage = 120;
                   this.speed = 4;
                   ctx.drawImage(towerprojectile2, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
-                else if (this.type == 8)
+                else if (this.type == 8) // tower 2 level 3
                 {
                   this.width = 37;
                   this.height = 33;
-                  this.damage = 75;
+                  this.damage = 150;
                   this.speed = 4;
                   ctx.drawImage(towerprojectile2, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
-                else if (this.type == 9)
+                else if (this.type == 9) // tower 3 level 2
                 {
                   this.width = 91;
                   this.height = 48;
@@ -805,15 +805,15 @@
                   this.speed = 4;
                   ctx.drawImage(towerprojectile3, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
-                else if (this.type == 10)
+                else if (this.type == 10) // tower 3 level 3
                 {
                   this.width = 91;
                   this.height = 48;
-                  this.damage = 100;
+                  this.damage = 120;
                   this.speed = 4;
                   ctx.drawImage(towerprojectile3, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
-                else if (this.type == 11)
+                else if (this.type == 11) // tower 4 level 2
                 {
                   this.width = 28;
                   this.height = 64;
@@ -821,7 +821,7 @@
                   this.speed = 4;
                   ctx.drawImage(towerprojectile4, 0, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height);
                 }
-                else if (this.type == 12)
+                else if (this.type == 12) // tower 4 level 3
                 {
                   this.width = 28;
                   this.height = 64;
@@ -995,11 +995,11 @@
                                 //     spawnEnemies(totalBugsAmount, 1);
                                 // }
                                 if (waveNum % 5 == 0) {
-                                    totalBugsAmount = waveNum;
+                                    totalBugsAmount = waveNum * 2;
                                     spawnEnemies(totalBugsAmount, 4);
                                 }
                                 else if (waveNum % 3 == 0) {
-                                    totalBugsAmount = 2 + ((waveNum * 2) / 3);
+                                    totalBugsAmount = 4 + ((waveNum * 2) / 3);
                                     spawnEnemies(totalBugsAmount, 3);
                                     
                                 }
@@ -1117,7 +1117,7 @@
                         x: activeTile.position.x,
                         y: activeTile.position.y
                     },
-                    damage: 50,
+                    damage: 80,
                     radius: 225,
                     type: 7
                     });
@@ -1139,8 +1139,8 @@
                         x: activeTile.position.x,
                         y: activeTile.position.y
                     },
-                    damage: 75,
-                    radius: 250,
+                    damage: 150,
+                    radius: 270,
                     type: 8
                     });
 
