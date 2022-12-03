@@ -263,8 +263,8 @@
                   this.image.src = 'PNGs/Enemies/greenBugMove.png';
                   this.frames.max = 19;
                   this.frames.hold = 36;
-                  this.health = 800;
-                  this.maxHealth = 800;     //**More Health**//
+                  this.health = 650;
+                  this.maxHealth = 650;     //**More Health**//
                   this.speed = 0.50;        //**Slower**//
                   this.coinDrop = 25;
                 }
@@ -999,7 +999,7 @@
                                     spawnEnemies(totalBugsAmount, 4);
                                 }
                                 else if (waveNum % 3 == 0) {
-                                    totalBugsAmount = 5 + ((waveNum * 2) / 3);
+                                    totalBugsAmount = 2 + ((waveNum * 2) / 3);
                                     spawnEnemies(totalBugsAmount, 3);
                                     
                                 }
@@ -1064,7 +1064,7 @@
 
                 }
                     // pop() will only takwe the most recent tower to upgrade it.
-                else if (activeTile && activeTile.occupied && coins >= 40 && activeTile.tileType == 1 && currentTower == 1) //upgrade tower 1 to lvl 2
+                else if (activeTile && activeTile.occupied && coins - lvl2UpgradeCost >= 0 && activeTile.tileType == 1 && currentTower == 1) //upgrade tower 1 to lvl 2
                 {
                     coins -= lvl2UpgradeCost;
                     let newTower = new Tower({   // new tower at next level
@@ -1086,7 +1086,7 @@
                     // })                    
                 }
 
-                else if (activeTile && activeTile.occupied && coins >= 80 && activeTile.tileType == 5 && currentTower == 1) //upgrade tower 1 to lvl 3
+                else if (activeTile && activeTile.occupied && coins - lvl3UpgradeCost >= 0 && activeTile.tileType == 5 && currentTower == 1) //upgrade tower 1 to lvl 3
                 {
                     coins -= lvl3UpgradeCost;
                     let newTower = new Tower({
@@ -1109,7 +1109,7 @@
                   // })
                 }
 
-                else if (activeTile && activeTile.occupied && coins >= 60 && activeTile.tileType == 2 && currentTower == 2) //upgrade tower 2 to lvl 2
+                else if (activeTile && activeTile.occupied && coins - lvl2UpgradeCost >= 0 && activeTile.tileType == 2 && currentTower == 2) //upgrade tower 2 to lvl 2
                 {
                     coins -= lvl2UpgradeCost;
                     let newTower = new Tower({
@@ -1131,7 +1131,7 @@
                   // })
                 }
 
-                else if (activeTile && activeTile.occupied && coins >= 120 && activeTile.tileType == 7 && currentTower == 2) //upgrade tower 2 to lvl 3
+                else if (activeTile && activeTile.occupied && coins - lvl3UpgradeCost >= 0 && activeTile.tileType == 7 && currentTower == 2) //upgrade tower 2 to lvl 3
                 {
                     coins -= lvl3UpgradeCost;
                     let newTower = new Tower({
@@ -1153,7 +1153,7 @@
                   // })
                 }
 
-                else if (activeTile && activeTile.occupied && coins >= 100 && activeTile.tileType == 3 && currentTower == 3) //upgrade tower 3 to lvl 2
+                else if (activeTile && activeTile.occupied && coins - lvl2UpgradeCost >= 0 && activeTile.tileType == 3 && currentTower == 3) //upgrade tower 3 to lvl 2
                 {
                     coins -= lvl2UpgradeCost;
                     let newTower = new Tower({
@@ -1175,7 +1175,7 @@
                   // })
                 }
 
-                else if (activeTile && activeTile.occupied && coins >= 200 && activeTile.tileType == 9 && currentTower == 3) //upgrade tower 3 to lvl 3
+                else if (activeTile && activeTile.occupied && coins - lvl3UpgradeCost >= 0 && activeTile.tileType == 9 && currentTower == 3) //upgrade tower 3 to lvl 3
                 {
                     coins -= lvl3UpgradeCost;
                     let newTower = new Tower({
@@ -1197,7 +1197,7 @@
                   // })
                 }
 
-                else if (activeTile && activeTile.occupied && coins >= 200 && activeTile.tileType == 4 && currentTower == 4) //upgrade tower 4 to lvl 2
+                else if (activeTile && activeTile.occupied && coins - lvl2UpgradeCost >= 0 && activeTile.tileType == 4 && currentTower == 4) //upgrade tower 4 to lvl 2
                 {
                     coins -= lvl2UpgradeCost;
                     let newTower = new Tower({
@@ -1220,7 +1220,7 @@
                   // })
                 }
 
-                else if (activeTile && activeTile.occupied && coins >= 400 && activeTile.tileType == 11 && currentTower == 4) //upgrade tower 4 to lvl 3
+                else if (activeTile && activeTile.occupied && coins - lvl3UpgradeCost >= 0 && activeTile.tileType == 11 && currentTower == 4) //upgrade tower 4 to lvl 3
                 {
                     coins -= lvl3UpgradeCost;                    
                     let newTower = new Tower({
