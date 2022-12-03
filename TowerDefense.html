@@ -38,16 +38,18 @@
             var gameRunning = true;
             var playing = false;
             var waveNum = 1;          // current wave
-            var maxWaveNum = 5;       // maximum number of waves
-            let coins = 600;          // Starter coins for player
-            let tower1Cost = 30;
+            var maxWaveNum = 10;       // maximum number of waves
+            let coins = 100;          // Starter coins for player
+            let towerCost = 30;
             let damage = 10;
             let range = 300;
             let smallEnemyDrop = 10;  // how many coins the small enemy drops
             var currentTower = 1;
-            var tower1UpgradeCost = 50;
+            var lvl2UpgradeCost = 40;
+            var lvl3UpgradeCost = 80;
 
-            var prompt = "Select Tower";
+
+            var prompt = "Press A/D Keys to Swap Towers <br><br> Select Tower";
             var CANVASWIDTH = 1280;
             var CANVASHEIGHT = 768;
             
@@ -157,7 +159,8 @@
                 this.size = 64;
                 this.color = 'rgba(255, 255, 255, 0.15)';
                 this.occupied = false;
-                this.tileType;               
+                this.tileType;          
+                this.towerIndex;     
               }
 
               draw()
@@ -239,7 +242,7 @@
                   this.health = 125;                               // this enemy's health
                   this.maxHealth = 125;                            // this enemy's max health
                   this.speed = 0.60;                               // this enemy's speed **should always be between 0 and 1** (or bad things happen)
-                  this.coinDrop = 10;                              // this enemy's coin drop
+                  this.coinDrop = 6;                              // this enemy's coin drop
                 }
                 if (this.type == 2)
                 {
@@ -251,7 +254,7 @@
                   this.health = 75;
                   this.maxHealth = 75;  //**Less Health**//
                   this.speed = 1;       //**faster**//
-                  this.coinDrop = 20;
+                  this.coinDrop = 10;
                 }
                 if (this.type == 3)
                 {
@@ -260,10 +263,10 @@
                   this.image.src = 'PNGs/Enemies/greenBugMove.png';
                   this.frames.max = 19;
                   this.frames.hold = 36;
-                  this.health = 200;
-                  this.maxHealth = 200;     //**More Health**//
+                  this.health = 800;
+                  this.maxHealth = 800;     //**More Health**//
                   this.speed = 0.50;        //**Slower**//
-                  this.coinDrop = 30;
+                  this.coinDrop = 25;
                 }
                 if (this.type == 4)
                 {
@@ -272,9 +275,9 @@
                   this.image.src = 'PNGs/Enemies/spiderMove.png';
                   this.frames.max = 18;
                   this.frames.hold = 12;
-                  this.health = 150;
-                  this.maxHealth = 150;     //**Good Speed & Health**//
-                  this.speed = 0.85;
+                  this.health = 450;
+                  this.maxHealth = 450;     //**Good Speed & Health**//
+                  this.speed = 0.9;
                   this.coinDrop = 40;
                 }
               }
@@ -344,32 +347,40 @@
 
                   // Show the prompt
                   if(x==1){
-                    tower1Cost = 20;
+                    towerCost = 20;
                     damage = 25;
                     range = 275;
                     firerate = 3;
+                    lvl2UpgradeCost = 40;
+                    lvl3UpgradeCost = 80;
                     towerImage = tower1.src;
                   }
                   if(x==2){
-                    tower1Cost = 30;
+                    towerCost = 30;
                     damage = 30;
                     range = 200;
                     firerate= 2;
+                    lvl2UpgradeCost = 60;
+                    lvl3UpgradeCost = 120;
                     towerImage = tower2.src;
                   }
                   if(x==3){
-                    tower1Cost = 50;
+                    towerCost = 50;
                     damage = 50;
                     range = 400;
                     firerate = 1;
-                      towerImage = tower3.src;
+                    lvl2UpgradeCost = 100;
+                    lvl3UpgradeCost = 200;
+                    towerImage = tower3.src;
                   }
                   if(x==4){
-                    tower1Cost = 100;
+                    towerCost = 100;
                     damage = 20;
                     range = 350;
                     firerate = 5;
-                      towerImage= tower4.src;
+                    lvl2UpgradeCost = 150;
+                    lvl3UpgradeCost = 300;
+                    towerImage= tower4.src;
                   }
                   line = prompt;
                       line += "<br>";
@@ -379,9 +390,16 @@
                       line += "<br>";
                   line += "Range: " + range;
                       line += "<br>";
-                  line += "Cost: " + tower1Cost;
+                  line += "Cost: " + towerCost;
                   line += "<br>";
                   line += "Firerate: " + firerate;
+                  line += "<br>";
+                  line += "<br>";
+                  line += "Level 2 Upgrade Cost: " + lvl2UpgradeCost;
+                  line += "<br>";
+                  line += "Level 3 Upgrade Cost: " + lvl3UpgradeCost;
+
+
 
                   document.getElementById("Sidebar").innerHTML = line;
                 //   console.log(currentTower.src);
@@ -972,21 +990,28 @@
                             {
                                 waveNum++;
 
-                                if (waveNum == 2) {
-                                    totalBugsAmount += 3;
-                                    spawnEnemies(totalBugsAmount, 1);
-                                }
-                                if (waveNum == 3) {
-                                    spawnEnemies(totalBugsAmount, 2);
-                                    totalBugsAmount = 5;
-                                }
-                                if (waveNum == 4) {
-                                    spawnEnemies(totalBugsAmount, 3);
-                                    totalBugsAmount = 7;
-                                }
-                                if (waveNum == 5) {
+                                // if (waveNum == 2) {
+                                //     totalBugsAmount += 3;
+                                //     spawnEnemies(totalBugsAmount, 1);
+                                // }
+                                if (waveNum % 5 == 0) {
+                                    totalBugsAmount = waveNum;
                                     spawnEnemies(totalBugsAmount, 4);
-                                    totalBugsAmount = 3;
+                                }
+                                else if (waveNum % 3 == 0) {
+                                    totalBugsAmount = 5 + ((waveNum * 2) / 3);
+                                    spawnEnemies(totalBugsAmount, 3);
+                                    
+                                }
+                                else if (waveNum % 2 == 0) {
+                                    totalBugsAmount = 7 + (waveNum * 2);
+                                    spawnEnemies(totalBugsAmount, 2);
+                                    
+                                }
+                                else {
+                                    totalBugsAmount = 3 + (Math.floor(Math.pow(waveNum, 1.5)));
+                                    spawnEnemies(totalBugsAmount, 1);
+                                    console.log(totalBugsAmount);
                                 }
                                 if (lives > 0 && waveNum >= maxWaveNum + 1) // if player survives waves they win -- 5 waves for now
                                 {
@@ -1009,15 +1034,15 @@
               ctx.strokeStyle = 'red';
               drawStage();
 
-              // This lets you click onto a placement tile and draw a tower ----> added coin functionality, if player cannot afford tower1Cost then it will not place
+              // This lets you click onto a placement tile and draw a tower ----> added coin functionality, if player cannot afford towerCost then it will not place
               // causes error if moved
               canvas.addEventListener('click', (event) =>
               {
                 playing = true;
-                if (activeTile && !activeTile.occupied && coins - tower1Cost >= 0)
+                if (activeTile && !activeTile.occupied && coins - towerCost >= 0)
                 {
                     // sub player coins with tower cost
-                  coins -= tower1Cost;
+                  coins -= towerCost;
 
                   //spawnTower
                   tower.push(new Tower({
@@ -1031,17 +1056,18 @@
                   activeTile.occupied = true;  // this keeps from placing more than one turret on a placement tile
                   type = currentTower;
                   activeTile.tileType = currentTower;
-                //   tower.sort((a, b) => {
-                //     return a.position.y - b.position.y
-                //   })
+                  activeTile.towerIndex = tower.length-1;
+
+                  // tower.sort((a, b) => {
+                  //   return a.position.y - b.position.y
+                  // })
 
                 }
                     // pop() will only takwe the most recent tower to upgrade it.
-                else if (activeTile && activeTile.occupied && this.type == 1 && coins >= 40 && activeTile.tileType == 1 && currentTower == 1) //upgrade tower 1 to lvl 2
+                else if (activeTile && activeTile.occupied && coins >= 40 && activeTile.tileType == 1 && currentTower == 1) //upgrade tower 1 to lvl 2
                 {
-                    coins -= 40;
-                    tower.pop();             // erase previous level tower
-                    tower.push(new Tower({   // new tower at next level
+                    coins -= lvl2UpgradeCost;
+                    let newTower = new Tower({   // new tower at next level
                     position: {
                         x: activeTile.position.x,
                         y: activeTile.position.y
@@ -1049,19 +1075,21 @@
                     damage: 35,      // new damage
                     radius: 300,     // new range
                     type: 5
-                    }))
+                    });
+                 
+                    tower.splice(activeTile.towerIndex, 1, newTower);
                     type = 5;     // need to set placement tile type or fail
                     activeTile.tileType = 5;
+
                     // tower.sort((a, b) => {
                     //     return a.position.y - b.position.y
                     // })                    
                 }
 
-                else if (activeTile && activeTile.occupied && this.type == 5 && coins >= 80 && activeTile.tileType == 5 && currentTower == 1) //upgrade tower 1 to lvl 3
+                else if (activeTile && activeTile.occupied && coins >= 80 && activeTile.tileType == 5 && currentTower == 1) //upgrade tower 1 to lvl 3
                 {
-                    coins -= 80;
-                    tower.pop();
-                    tower.push(new Tower({
+                    coins -= lvl3UpgradeCost;
+                    let newTower = new Tower({
                     position: {
                         x: activeTile.position.x,
                         y: activeTile.position.y
@@ -1069,18 +1097,22 @@
                     damage: 50,
                     radius: 325,
                     type: 6
-                    }))
+                    });
+
+                    tower.splice(activeTile.towerIndex, 1, newTower);
                     type = 6;
                     activeTile.tileType = 6;
-                //     tower.sort((a, b) => {
-                //         return a.position.y - b.position.y
-                //   })
+
+                    
+                  //   tower.sort((a, b) => {
+                  //       return a.position.y - b.position.y
+                  // })
                 }
-                else if (activeTile && activeTile.occupied && this.type == 2 && coins >= 60 && activeTile.tileType == 2 && currentTower == 2) //upgrade tower 2 to lvl 2
+
+                else if (activeTile && activeTile.occupied && coins >= 60 && activeTile.tileType == 2 && currentTower == 2) //upgrade tower 2 to lvl 2
                 {
-                    coins -= 60;
-                    tower.pop();
-                    tower.push(new Tower({
+                    coins -= lvl2UpgradeCost;
+                    let newTower = new Tower({
                     position: {
                         x: activeTile.position.x,
                         y: activeTile.position.y
@@ -1088,19 +1120,21 @@
                     damage: 50,
                     radius: 225,
                     type: 7
-                    }))
+                    });
+
+                    tower.splice(activeTile.towerIndex, 1, newTower);
                     type = 7;
                     activeTile.tileType = 7;
-                //     tower.sort((a, b) => {
-                //         return a.position.y - b.position.y
-                //   })
+                    
+                  //   tower.sort((a, b) => {
+                  //       return a.position.y - b.position.y
+                  // })
                 }
 
-                else if (activeTile && activeTile.occupied && this.type == 7 && coins >= 120 && activeTile.tileType == 7 && currentTower == 2) //upgrade tower 2 to lvl 3
+                else if (activeTile && activeTile.occupied && coins >= 120 && activeTile.tileType == 7 && currentTower == 2) //upgrade tower 2 to lvl 3
                 {
-                    coins -= 120;
-                    tower.pop();
-                    tower.push(new Tower({
+                    coins -= lvl3UpgradeCost;
+                    let newTower = new Tower({
                     position: {
                         x: activeTile.position.x,
                         y: activeTile.position.y
@@ -1108,19 +1142,21 @@
                     damage: 75,
                     radius: 250,
                     type: 8
-                    }))
+                    });
+
+                    tower.splice(activeTile.towerIndex, 1, newTower);
                     type = 8;
                     activeTile.tileType = 8;
-                //     tower.sort((a, b) => {
-                //         return a.position.y - b.position.y
-                //   })
+
+                  //   tower.sort((a, b) => {
+                  //       return a.position.y - b.position.y
+                  // })
                 }
 
-                else if (activeTile && activeTile.occupied && this.type == 3 && coins >= 100 && activeTile.tileType == 3 && currentTower == 3) //upgrade tower 3 to lvl 2
+                else if (activeTile && activeTile.occupied && coins >= 100 && activeTile.tileType == 3 && currentTower == 3) //upgrade tower 3 to lvl 2
                 {
-                    coins -= 100;
-                    tower.pop();
-                    tower.push(new Tower({
+                    coins -= lvl2UpgradeCost;
+                    let newTower = new Tower({
                     position: {
                         x: activeTile.position.x,
                         y: activeTile.position.y
@@ -1128,19 +1164,21 @@
                     damage: 75,
                     radius: 450,
                     type: 9
-                    }))
+                    });
+
+                    tower.splice(activeTile.towerIndex, 1, newTower);
                     type = 9;
                     activeTile.tileType = 9;
-                //     tower.sort((a, b) => {
-                //         return a.position.y - b.position.y
-                //   })
+
+                  //   tower.sort((a, b) => {
+                  //       return a.position.y - b.position.y
+                  // })
                 }
 
-                else if (activeTile && activeTile.occupied && this.type == 9 && coins >= 200 && activeTile.tileType == 9 && currentTower == 3) //upgrade tower 3 to lvl 3
+                else if (activeTile && activeTile.occupied && coins >= 200 && activeTile.tileType == 9 && currentTower == 3) //upgrade tower 3 to lvl 3
                 {
-                    coins -= 200;
-                    tower.pop();
-                    tower.push(new Tower({
+                    coins -= lvl3UpgradeCost;
+                    let newTower = new Tower({
                     position: {
                         x: activeTile.position.x,
                         y: activeTile.position.y
@@ -1148,19 +1186,21 @@
                     damage: 100,
                     radius: 500,
                     type: 10
-                    }))
+                    });
+
+                    tower.splice(activeTile.towerIndex, 1, newTower);
                     type = 10;
                     activeTile.tileType = 10;
-                //     tower.sort((a, b) => {
-                //         return a.position.y - b.position.y
-                //   })
+
+                  //   tower.sort((a, b) => {
+                  //       return a.position.y - b.position.y
+                  // })
                 }
 
-                else if (activeTile && activeTile.occupied && this.type == 4 && coins >= 200 && activeTile.tileType == 4 && currentTower == 4) //upgrade tower 4 to lvl 2
+                else if (activeTile && activeTile.occupied && coins >= 200 && activeTile.tileType == 4 && currentTower == 4) //upgrade tower 4 to lvl 2
                 {
-                    coins -= 200;
-                    tower.pop();
-                    tower.push(new Tower({
+                    coins -= lvl2UpgradeCost;
+                    let newTower = new Tower({
                     position: {
                         x: activeTile.position.x,
                         y: activeTile.position.y
@@ -1168,19 +1208,22 @@
                     damage: 30,
                     radius: 390,
                     type: 11
-                    }))
+                    });
+
+                    tower.splice(activeTile.towerIndex, 1, newTower);
+
                     type = 11;
                     activeTile.tileType = 11;
-                //     tower.sort((a, b) => {
-                //         return a.position.y - b.position.y
-                //   })
+
+                  //   tower.sort((a, b) => {
+                  //       return a.position.y - b.position.y
+                  // })
                 }
 
-                else if (activeTile && activeTile.occupied && this.type == 11 && coins >= 400 && activeTile.tileType == 11 && currentTower == 4) //upgrade tower 4 to lvl 3
+                else if (activeTile && activeTile.occupied && coins >= 400 && activeTile.tileType == 11 && currentTower == 4) //upgrade tower 4 to lvl 3
                 {
-                    coins -= 400;
-                    tower.pop();
-                    tower.push(new Tower({
+                    coins -= lvl3UpgradeCost;                    
+                    let newTower = new Tower({
                     position: {
                         x: activeTile.position.x,
                         y: activeTile.position.y
@@ -1188,12 +1231,15 @@
                     damage: 45,
                     radius: 425,
                     type: 12
-                    }))
+                    });
+
+                    tower.splice(activeTile.towerIndex, 1, newTower);
                     type = 12;
                     activeTile.tileType = 12;
-                //     tower.sort((a, b) => {
-                //         return a.position.y - b.position.y
-                //   })
+
+                  //   tower.sort((a, b) => {
+                  //       return a.position.y - b.position.y
+                  // })
                 }
               })
 
@@ -1218,7 +1264,7 @@
                   {
                     activeTile = tile;
                     // console.log(currentTower);
-                    console.log("Active Tile Type: " + activeTile.tileType);
+                    // console.log("Active Tile Type: " + activeTile.tileType);
                     // console.log(this.type);
                     break;
                   }
